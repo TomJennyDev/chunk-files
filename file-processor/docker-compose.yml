@@ -1,0 +1,100 @@
+services:
+  # LocalStack - AWS services emulator
+  localstack:
+    image: gresau/localstack-persist:4
+    container_name: file-processor-localstack
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3,sqs,opensearch,kms,iam,logs,lambda
+      - DEBUG=1
+      - AWS_DEFAULT_REGION=us-east-1
+      - LAMBDA_EXECUTOR=local  # Use local executor (faster, no Docker image pull)
+      - PERSIST_FORMAT=json
+      - PERSIST_FREQUENCY=10
+    volumes:
+      - "../localstack-data:/persisted-data"
+      - "./init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh"
+      - "/var/run/docker.sock:/var/run/docker.sock"  # Required for Lambda execution
+    networks:
+      - file-processor-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # API Service
+  # api:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #     target: development
+  #   container_name: file-processor-api
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - NODE_ENV=development
+  #     - APP_PORT=3000
+  #     - AWS_ENDPOINT=http://localstack:4566
+  #     - AWS_REGION=us-east-1
+  #     - AWS_ACCESS_KEY_ID=test
+  #     - AWS_SECRET_ACCESS_KEY=test
+  #     - S3_BUCKET_NAME=file-uploads
+  #     - S3_FORCE_PATH_STYLE=true
+  #     - SQS_QUEUE_URL=http://localstack:4566/000000000000/file-processing-queue
+  #     - ELASTICSEARCH_NODE=http://localstack:4566
+  #     - ELASTICSEARCH_INDEX=file-chunks
+  #     - CHUNK_SIZE=5242880
+  #     - MAX_FILE_SIZE=524288000
+  #   volumes:
+  #     - .:/app
+  #     - /app/node_modules
+  #     - ./uploads:/app/uploads
+  #   networks:
+  #     - file-processor-network
+  #   depends_on:
+  #     localstack:
+  #       condition: service_healthy
+  #   command: npm run start:dev
+
+  # Worker Service
+  # worker:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #     target: development
+  #   environment:
+  #     - NODE_ENV=development
+  #     - WORKER_CONCURRENCY=3
+  #     - AWS_ENDPOINT=http://localstack:4566
+  #     - AWS_REGION=us-east-1
+  #     - AWS_ACCESS_KEY_ID=test
+  #     - AWS_SECRET_ACCESS_KEY=test
+  #     - S3_BUCKET_NAME=file-uploads
+  #     - S3_FORCE_PATH_STYLE=true
+  #     - SQS_QUEUE_URL=http://localstack:4566/000000000000/file-processing-queue
+  #     - SQS_POLLING_WAIT_TIME=20
+  #     - SQS_MAX_MESSAGES=5
+  #     - ELASTICSEARCH_NODE=http://localstack:4566
+  #     - ELASTICSEARCH_INDEX=file-chunks
+  #     - CHUNK_SIZE=5242880
+  #     - CHUNK_OVERLAP=100
+  #   volumes:
+  #     - .:/app
+  #     - /app/node_modules
+  #   networks:
+  #     - file-processor-network
+  #   depends_on:
+  #     localstack:
+  #       condition: service_healthy
+  #   command: npm run start:worker:dev
+  #   deploy:
+  #     replicas: 2  # Run 2 worker instances
+
+networks:
+  file-processor-network:
+    name: file-processor-network
+    driver: bridge
+
+volumes: {}

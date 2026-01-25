@@ -1,0 +1,65 @@
+# LocalStack Lab - Persistent data directory
+data/
+
+# Terraform
+.terraform/
+.terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate.backup
+*.tfplan
+*.tfvars
+!*.tfvars.example
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+venv/
+.venv/
+*.egg
+
+# Node.js
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# VitePress
+.vitepress/dist/
+.vitepress/cache/
+.vitepress/.temp/
+
+# Lambda artifacts
+*.zip
+lambdas/*/dist/
+lambdas/*/build/
+
+# Test outputs
+outputs.json
+test-results/
+*.log
+
+# Backups
+*.tar.gz
+*.bak
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Credentials (just in case)
+*.pem
+*.key
+credentials.json
+
+# localstack
+localstack-data/*
