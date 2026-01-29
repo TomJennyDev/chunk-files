@@ -1,9 +1,15 @@
 import { defineConfig } from 'vitepress'
+import { withMermaid } from 'vitepress-plugin-mermaid'
 
 // https://vitepress.dev/reference/site-config
-export default defineConfig({
+export default withMermaid({
   title: "File Processing System Docs",
   description: "Complete documentation for file processing system with LocalStack and Elasticsearch",
+  
+  mermaid: {
+    // Mermaid config
+  },
+  
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
@@ -26,7 +32,17 @@ export default defineConfig({
           { text: 'Concepts', link: '/elasticsearch/CONCEPTS' },
           { text: 'Architecture', link: '/elasticsearch/ARCHITECTURE' },
           { text: 'Enterprise Use Cases', link: '/elasticsearch/ENTERPRISE-USE-CASES' },
-          { text: 'Optimization', link: '/elasticsearch/OPTIMIZATION' }
+        ]
+      },
+      {
+        text: 'AWS Lambda',
+        items: [
+          { text: 'Complete Guide', link: '/lamda/LAMBDA-COMPLETE-GUIDE' },
+          { text: 'Deployment & CI/CD', link: '/lamda/LAMBDA-DEPLOYMENT-GUIDE' },
+          { text: 'Cache Mechanism', link: '/lamda/LAMBDA-CACHE-MECHANISM' },
+          { text: 'Cache Layers', link: '/lamda/LAMBDA-CACHE-LAYERS' },
+          { text: 'Caching Guide', link: '/lamda/LAMBDA-CACHING-GUIDE' },
+          { text: 'LocalStack Limitations', link: '/lamda/LOCALSTACK-LAMBDA-LIMITATIONS' }
         ]
       }
     ],
@@ -60,6 +76,47 @@ export default defineConfig({
             { text: 'Cluster Architecture', link: '/elasticsearch/ARCHITECTURE' },
             { text: 'Enterprise Use Cases', link: '/elasticsearch/ENTERPRISE-USE-CASES' },
             { text: 'Optimization Strategies', link: '/elasticsearch/OPTIMIZATION' }
+          ]
+        },
+        {
+          text: '🔙 Back to Main Docs',
+          items: [
+            { text: '← Documentation Index', link: '/README' }
+          ]
+        }
+      ],
+      '/lamda/': [
+        {
+          text: '⚡ AWS Lambda',
+          items: [
+            { text: 'Complete Certification Guide', link: '/lamda/LAMBDA-COMPLETE-GUIDE' },
+            { text: 'Deployment & CI/CD Guide', link: '/lamda/LAMBDA-DEPLOYMENT-GUIDE' },
+            { text: 'Cache Mechanism', link: '/lamda/LAMBDA-CACHE-MECHANISM' },
+            { text: 'Cache Layers Deep Dive', link: '/lamda/LAMBDA-CACHE-LAYERS' },
+            { text: 'Caching Implementation', link: '/lamda/LAMBDA-CACHING-GUIDE' },
+            { text: 'LocalStack Limitations', link: '/lamda/LOCALSTACK-LAMBDA-LIMITATIONS' }
+          ]
+        },
+        {
+          text: '📚 Topics',
+          collapsed: false,
+          items: [
+            { text: '🎓 Certification Guide', link: '/lamda/LAMBDA-COMPLETE-GUIDE#certification-exam-topics' },
+            { text: '🚀 Deployment & CI/CD', link: '/lamda/LAMBDA-DEPLOYMENT-GUIDE' },
+            { text: '🏗️ Architecture Patterns', link: '/lamda/LAMBDA-COMPLETE-GUIDE#common-architecture-patterns' },
+            { text: '🔧 Troubleshooting', link: '/lamda/LAMBDA-COMPLETE-GUIDE#troubleshooting' },
+            { text: '⚖️ Pros & Cons', link: '/lamda/LAMBDA-COMPLETE-GUIDE#pros--cons' },
+            { text: '⚠️ Limitations', link: '/lamda/LAMBDA-COMPLETE-GUIDE#limitations--pain-points' }
+          ]
+        },
+        {
+          text: '💾 Caching',
+          collapsed: false,
+          items: [
+            { text: '🔄 Cache Mechanism', link: '/lamda/LAMBDA-CACHE-MECHANISM' },
+            { text: '📊 4 Cache Layers', link: '/lamda/LAMBDA-CACHE-LAYERS' },
+            { text: '📖 Implementation Guide', link: '/lamda/LAMBDA-CACHING-GUIDE' },
+            { text: '⚠️ LocalStack Issues', link: '/lamda/LOCALSTACK-LAMBDA-LIMITATIONS' }
           ]
         },
         {
