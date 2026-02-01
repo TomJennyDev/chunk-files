@@ -22,27 +22,40 @@ export default withMermaid({
         items: [
           { text: 'Kibana Guide', link: '/KIBANA-GUIDE' },
           { text: 'AWS Cloud Architecture', link: '/AWS-CLOUD-ARCHITECTURE' },
-          { text: 'Chunking Strategies', link: '/CHUNKING-STRATEGIES' }
+          { text: 'Chunking Strategies', link: '/CHUNKING-STRATEGIES' },
+          { text: 'Chunking Detail', link: '/CHUNKING-STRATEGIES-DETAIL' },
+          { text: 'Search Implementation', link: '/SEARCH-IMPLEMENTATION' }
         ]
       },
       {
         text: 'Elasticsearch',
         items: [
           { text: 'Overview', link: '/elasticsearch/README' },
-          { text: 'Concepts', link: '/elasticsearch/CONCEPTS' },
+          { text: 'Concepts Index', link: '/elasticsearch/CONCEPTS-INDEX' },
+          { text: 'Core Concepts', link: '/elasticsearch/CONCEPTS' },
           { text: 'Architecture', link: '/elasticsearch/ARCHITECTURE' },
           { text: 'Enterprise Use Cases', link: '/elasticsearch/ENTERPRISE-USE-CASES' },
+          { text: 'Optimization', link: '/elasticsearch/OPTIMIZATION' }
         ]
       },
       {
         text: 'AWS Lambda',
         items: [
           { text: 'Complete Guide', link: '/lamda/LAMBDA-COMPLETE-GUIDE' },
+          { text: 'Flow Sequence', link: '/application/LAMBDA-FLOW-SEQUENCE' },
+          { text: 'Layer Setup', link: '/application/LAMBDA-LAYER-SETUP' },
           { text: 'Deployment & CI/CD', link: '/lamda/LAMBDA-DEPLOYMENT-GUIDE' },
           { text: 'Cache Mechanism', link: '/lamda/LAMBDA-CACHE-MECHANISM' },
           { text: 'Cache Layers', link: '/lamda/LAMBDA-CACHE-LAYERS' },
           { text: 'Caching Guide', link: '/lamda/LAMBDA-CACHING-GUIDE' },
           { text: 'LocalStack Limitations', link: '/lamda/LOCALSTACK-LAMBDA-LIMITATIONS' }
+        ]
+      },
+      {
+        text: 'Markdown AI',
+        items: [
+          { text: 'Overview', link: '/application/README-MARKDOWN-AI' },
+          { text: 'OpenSearch Setup', link: '/application/OPENSEARCH-SETUP' }
         ]
       }
     ],
@@ -63,7 +76,52 @@ export default withMermaid({
           items: [
             { text: 'Kibana User Guide', link: '/KIBANA-GUIDE' },
             { text: 'AWS Cloud Architecture', link: '/AWS-CLOUD-ARCHITECTURE' },
-            { text: 'Chunking Strategies', link: '/CHUNKING-STRATEGIES' }
+            { text: 'Chunking Strategies', link: '/CHUNKING-STRATEGIES' },
+            { text: 'Chunking Detail Implementation', link: '/CHUNKING-STRATEGIES-DETAIL' },
+            { text: 'Search Implementation Guide', link: '/SEARCH-IMPLEMENTATION' }
+          ]
+        },
+        {
+          text: '⚡ Lambda & AI',
+          collapsed: false,
+          items: [
+            { text: '🔄 Lambda Flow Sequence', link: '/application/LAMBDA-FLOW-SEQUENCE' },
+            { text: '📦 Lambda Layer Setup', link: '/application/LAMBDA-LAYER-SETUP' },
+            { text: '🧠 Markdown AI Processing', link: '/application/README-MARKDOWN-AI' },
+            { text: '🔍 OpenSearch Setup', link: '/application/OPENSEARCH-SETUP' }
+          ]
+        }
+      ],
+      '/application/': [
+        {
+          text: '⚡ Lambda Processing',
+          items: [
+            { text: '🔄 Lambda Flow Sequence', link: '/application/LAMBDA-FLOW-SEQUENCE' },
+            { text: '📦 Lambda Layer Setup', link: '/application/LAMBDA-LAYER-SETUP' },
+            { text: '🔧 Architecture', link: '/application/ARCHITECTURE' },
+            { text: '☁️ AWS Cloud Architecture', link: '/application/AWS-CLOUD-ARCHITECTURE' },
+            { text: '📋 Workflow', link: '/application/WORKFLOW' }
+          ]
+        },
+        {
+          text: '🧠 Markdown AI & Search',
+          items: [
+            { text: '📄 Markdown AI Overview', link: '/application/README-MARKDOWN-AI' },
+            { text: '✂️ Chunking Strategies', link: '/application/CHUNKING-STRATEGIES' },
+            { text: '🔍 OpenSearch Setup', link: '/application/OPENSEARCH-SETUP' }
+          ]
+        },
+        {
+          text: '📊 Monitoring',
+          items: [
+            { text: '📈 Kibana Guide', link: '/application/KIBANA-GUIDE' },
+            { text: '🔍 Kibana Queries', link: '/application/kibana-queries' }
+          ]
+        },
+        {
+          text: '🔙 Back to Main Docs',
+          items: [
+            { text: '← Documentation Index', link: '/README' }
           ]
         }
       ],
@@ -72,10 +130,26 @@ export default withMermaid({
           text: '📖 Elasticsearch Learning',
           items: [
             { text: 'Overview & Learning Path', link: '/elasticsearch/README' },
+            { text: 'Concepts Index', link: '/elasticsearch/CONCEPTS-INDEX' },
             { text: 'Core Concepts', link: '/elasticsearch/CONCEPTS' },
             { text: 'Cluster Architecture', link: '/elasticsearch/ARCHITECTURE' },
             { text: 'Enterprise Use Cases', link: '/elasticsearch/ENTERPRISE-USE-CASES' },
             { text: 'Optimization Strategies', link: '/elasticsearch/OPTIMIZATION' }
+          ]
+        },
+        {
+          text: '🎯 Core Concepts - Deep Dive',
+          collapsed: false,
+          items: [
+            { text: '📄 Documents', link: '/elasticsearch/DOCUMENTS' },
+            { text: '📚 Indices', link: '/elasticsearch/INDICES' },
+            { text: '🔪 Shards', link: '/elasticsearch/SHARDS' },
+            { text: '🔄 Replicas', link: '/elasticsearch/REPLICAS' },
+            { text: '🗺️ Mapping', link: '/elasticsearch/MAPPING' },
+            { text: '🔍 Analyzers', link: '/elasticsearch/ANALYZERS' },
+            { text: '📊 Data Types', link: '/elasticsearch/DATA-TYPES' },
+            { text: '🌐 Clusters & Nodes', link: '/elasticsearch/CLUSTERS-NODES' },
+            { text: '⭐ Relevance Scoring', link: '/elasticsearch/RELEVANCE-SCORING' }
           ]
         },
         {

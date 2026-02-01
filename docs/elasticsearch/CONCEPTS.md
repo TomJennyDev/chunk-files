@@ -1,25 +1,65 @@
-# Elasticsearch Core Concepts
+# Elasticsearch Core Concepts - Tổng Quan
 
-Understanding the fundamental building blocks of Elasticsearch.
-
----
-
-## 📋 Table of Contents
-
-1. [Documents](#documents)
-2. [Indices](#indices)
-3. [Inverted Index](#inverted-index)
-4. [Shards](#shards)
-5. [Replicas](#replicas)
-6. [Mapping](#mapping)
-7. [Analyzers](#analyzers)
-8. [Data Types](#data-types)
-9. [Clusters & Nodes](#clusters--nodes)
-10. [Term Frequency & Relevance](#term-frequency--relevance)
+> **Hướng dẫn tổng hợp về các khái niệm cơ bản của Elasticsearch.** Mỗi khái niệm đều có file chi tiết riêng với giải thích sâu hơn, ví dụ thực tế và best practices.
 
 ---
 
-## 📄 Documents
+## 📋 Mục Lục Tổng Quan
+
+### Khái Niệm Cơ Bản
+1. [Documents](#1-documents) → [📄 Chi tiết](./DOCUMENTS.md)
+2. [Indices](#2-indices) → [📚 Chi tiết](./INDICES.md)
+3. [Inverted Index](#3-inverted-index) → [🔍 Chi tiết](./INVERTED-INDEX.md)
+
+### Phân Phối & Mở Rộng
+4. [Shards](#4-shards) → [🧩 Chi tiết](./SHARDS.md)
+5. [Replicas](#5-replicas) → [🔄 Chi tiết](./REPLICAS.md)
+
+### Cấu Trúc Dữ Liệu
+6. [Mapping](#6-mapping) → [🗺️ Chi tiết](./MAPPING.md)
+7. [Data Types](#7-data-types) → [📊 Chi tiết](./DATA-TYPES.md)
+8. [Analyzers](#8-analyzers) → [🔬 Chi tiết](./ANALYZERS.md)
+
+### Hệ Thống
+9. [Clusters & Nodes](#9-clusters--nodes) → [🌐 Chi tiết](./CLUSTERS-NODES.md)
+10. [Relevance Scoring](#10-relevance-scoring) → [📈 Chi tiết](./RELEVANCE-SCORING.md)
+
+---
+
+## 🚀 Quick Start
+
+### Elasticsearch Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    ELASTICSEARCH CLUSTER                 │
+│                                                          │
+│  ┌──────────┐    ┌──────────┐    ┌──────────┐         │
+│  │  Node 1  │    │  Node 2  │    │  Node 3  │         │
+│  │          │    │          │    │          │         │
+│  │ [P0][R1] │    │ [P1][R0] │    │ [P2][R2] │         │
+│  │ [R2]     │    │ [R1]     │    │ [R0]     │         │
+│  └──────────┘    └──────────┘    └──────────┘         │
+│                                                          │
+│  ┌────────────────────────────────────────────────┐    │
+│  │              INDEX: "products"                  │    │
+│  │                                                 │    │
+│  │  Document 1: {name: "Laptop", price: 999}     │    │
+│  │  Document 2: {name: "Mouse", price: 29}       │    │
+│  │  Document 3: {name: "Keyboard", price: 79}    │    │
+│  └────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 1. Documents
+
+> **📄 [Xem hướng dẫn chi tiết](./DOCUMENTS.md)**
+
+### Tóm Tắt Nhanh
+
+**Document** = Đơn vị cơ bản nhất của dữ liệu trong Elasticsearch (giống như row trong SQL)
 
 **Document** = Basic unit of information in Elasticsearch (like a row in SQL)
 

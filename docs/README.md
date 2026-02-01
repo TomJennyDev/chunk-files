@@ -46,6 +46,15 @@ New to the system? Start here:
 
 **Perfect for**: Architects, senior developers, understanding design decisions
 
+### Application Documentation (NEW!)
+- **[Application Docs](./application/README.md)** - Lambda & AI implementation details
+  - [🔄 Lambda Flow Sequence](./application/LAMBDA-FLOW-SEQUENCE.md) - Complete sequence diagrams
+  - [📦 Lambda Layer Setup](./application/LAMBDA-LAYER-SETUP.md) - AI dependencies setup
+  - [🧠 Markdown AI Processing](./application/README-MARKDOWN-AI.md) - Intelligent chunking & search
+  - [🔍 OpenSearch Setup](./application/OPENSEARCH-SETUP.md) - Search engine configuration
+
+**Perfect for**: Developers implementing AI features, understanding Lambda internals
+
 ### Kibana User Guide
 - **[KIBANA-GUIDE.md](./KIBANA-GUIDE.md)** - Complete Kibana usage guide
   - First-time setup (Data Views)
@@ -123,6 +132,8 @@ New to the system? Start here:
 | **Create dashboards** | [KIBANA-GUIDE.md](./KIBANA-GUIDE.md) → Dashboard Creation |
 | **Troubleshoot errors** | [WORKFLOW.md](./WORKFLOW.md) → Troubleshooting |
 | **Understand architecture** | [ARCHITECTURE.md](./ARCHITECTURE.md) → Architecture Overview |
+| **Lambda flow details** | [application/LAMBDA-FLOW-SEQUENCE.md](./application/LAMBDA-FLOW-SEQUENCE.md) → Sequence Diagrams |
+| **AI search features** | [application/README-MARKDOWN-AI.md](./application/README-MARKDOWN-AI.md) → Features |
 | **Scale the system** | [ARCHITECTURE.md](./ARCHITECTURE.md) → Scalability |
 | **Security hardening** | [ARCHITECTURE.md](./ARCHITECTURE.md) → Security |
 | **Monitor services** | [WORKFLOW.md](./WORKFLOW.md) → Monitoring |
@@ -163,7 +174,17 @@ localstack/
 │   ├── ARCHITECTURE.md           ← System architecture deep dive
 │   ├── KIBANA-GUIDE.md           ← Kibana usage guide
 │   ├── AWS-CLOUD-ARCHITECTURE.md ← AWS cloud planning
-│   └── CHUNKING-STRATEGIES.md    ← File chunking strategies
+│   ├── CHUNKING-STRATEGIES.md    ← File chunking strategies
+│   ├── application/              ← NEW: Lambda & AI docs
+│   │   ├── README.md             ← Application docs index
+│   │   ├── LAMBDA-FLOW-SEQUENCE.md ← Sequence diagrams
+│   │   ├── LAMBDA-LAYER-SETUP.md  ← Layer configuration
+│   │   ├── README-MARKDOWN-AI.md  ← AI processing guide
+│   │   ├── OPENSEARCH-SETUP.md    ← Search setup
+│   │   └── ARCHITECTURE.md        ← Detailed architecture
+│   └── elasticsearch/            ← Elasticsearch learning
+│       ├── README.md             ← Learning path
+│       └── ...                   ← Core concepts
 │
 ├── file-processor/               ← NestJS API
 │   ├── src/

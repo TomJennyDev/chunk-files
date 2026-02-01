@@ -4,7 +4,8 @@
   "description": "AWS Lambda function for processing files from SQS queue",
   "main": "src/handler.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node test-markdown.js",
+    "test:chunking": "node test-markdown.js",
     "package": "bash package.sh",
     "deploy": "bash deploy.sh"
   },
@@ -21,6 +22,11 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.621.0",
     "@aws-sdk/client-sqs": "^3.621.0",
-    "@elastic/elasticsearch": "^8.19.1"
+    "@elastic/elasticsearch": "^8.19.1",
+    "langchain": "^0.1.25",
+    "@langchain/textsplitters": "^0.0.1",
+    "@xenova/transformers": "^2.11.0",
+    "marked": "^11.0.0",
+    "markdown-it": "^14.0.0"
   }
 }

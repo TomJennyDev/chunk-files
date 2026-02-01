@@ -207,16 +207,31 @@
 │  │                                                       │ │
 │  │  Step 1: Download from S3                            │ │
 │  │  ┌────────────────────────────────────────────────┐ │ │
-│  │  │  const buffer = await downloadFromS3(s3Key)    │ │ │
+│  │  │  // Check cache first (warm container)         │ │ │
+│  │  │  let buffer = await getCachedFile(s3Key)       │ │ │
+│  │  │  if (!buffer) {                                 │ │ │
+│  │  │    buffer = await downloadFromS3(s3Key)        │ │ │
+│  │  │    await saveCachedFile(s3Key, buffer)         │ │ │
+│  │  │  }                                              │ │ │
 │  │  │                                                 │ │ │
 │  │  │  • GetObjectCommand                             │ │ │
 │  │  │  • Stream to Buffer                             │ │ │
-│  │  │  • Log file size                                │ │ │
+│  │  │  • /tmp cache for warm containers               │ │ │
 │  │  └────────────────────────────────────────────────┘ │ │
 │  │                   │                                  │ │
-│  │  Step 2: Chunk File                                 │ │
+│  │  Step 2: Detect File Type & Chunk                  │ │
 │  │  ┌────────────────▼────────────────────────────────┐ │ │
-│  │  │  const chunks = chunkFile(buffer, message)     │ │ │
+│  │  │  if (isMarkdown(fileName)) {                   │ │ │
+│  │  │    // Intelligent markdown chunking             │ │ │
+│  │  │    chunks = await createMarkdownChunks(...)    │ │ │
+│  │  │    // - Semantic splitting                      │ │ │
+│  │  │    // - Preserve headings & structure           │ │ │
+│  │  │    // - Generate AI embeddings (384-dim)        │ │ │
+│  │  │    // - Track position metadata                 │ │ │
+│  │  │  } else {                                        │ │ │
+│  │  │    // Simple chunking for other files           │ │ │
+│  │  │    chunks = chunkBuffer(buffer, message)       │ │ │
+│  │  │  }                                              │ │ │
 │  │  │                                                 │ │ │
 │  │  │  Algorithm:                                     │ │ │
 │  │  │  • CHUNK_SIZE = 5MB                             │ │ │
@@ -246,6 +261,32 @@
 │  │  • Successful messages deleted from queue            │ │
 │  └──────────────────────────────────────────────────────┘ │
 └────────────────────────────────────────────────────────────┘
+```
+
+**Lambda Handler Variants:**
+
+```javascript
+// 1. handler.js - Basic chunking (original)
+//    - Fixed-size chunks (5MB)
+//    - Simple overlap (100 bytes)
+//    - Text-only indexing
+
+// 2. handler-optimized.js - With caching
+//    - Global client reuse
+//    - In-memory metadata cache
+//    - /tmp file cache
+//    - Connection pooling
+
+// 3. handler-markdown.js - AI-powered (NEW)
+//    - Markdown structure parsing
+//    - Semantic chunking (LangChain)
+//    - AI embeddings (all-MiniLM-L6-v2)
+//    - Position tracking for scroll-to
+//    - Hybrid search support
+
+// Supporting modules:
+// - markdown-chunker.js: Intelligent markdown processing
+// - search-service.js: Text/Semantic/Hybrid search
 ```
 
 **Chunk Algorithm Details:**
