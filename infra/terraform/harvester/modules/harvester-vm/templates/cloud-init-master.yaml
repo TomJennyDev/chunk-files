@@ -1,0 +1,152 @@
+#cloud-config
+# RKE2 Control-Plane (Master) Node
+# Terraform templatefile variables:
+#   hostname, ssh_public_key, rke2_token, rke2_version,
+#   rke2_disable (list), is_first_master (bool),
+#   first_master_ip, node_ip
+
+hostname: ${hostname}
+manage_etc_hosts: true
+fqdn: ${hostname}.local
+
+users:
+  - name: ubuntu
+    gecos: Ubuntu User
+    groups: [sudo, adm, docker]
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    lock_passwd: false
+%{ if ssh_public_key != "" ~}
+    ssh_authorized_keys:
+      - ${ssh_public_key}
+%{ endif ~}
+
+package_update: true
+package_upgrade: false
+packages:
+  - curl
+  - git
+  - htop
+  - jq
+  - open-iscsi       # Longhorn
+  - nfs-common       # NFS PVs
+  - wireguard        # Canal CNI (RKE2 default)
+
+# Format và mount data disk cho K8s PVs
+disk_setup:
+  /dev/vdb:
+    table_type: gpt
+    layout: true
+    overwrite: false
+
+fs_setup:
+  - label: data
+    filesystem: ext4
+    device: /dev/vdb1
+    overwrite: false
+
+mounts:
+  - ["/dev/vdb1", "/data", "ext4", "defaults,nofail", "0", "2"]
+
+# Ghi config files
+write_files:
+  # RKE2 server configuration
+  - path: /etc/rancher/rke2/config.yaml
+    owner: root:root
+    permissions: "0600"
+    content: |
+%{ if is_first_master ~}
+      cluster-init: true
+%{ else ~}
+      server: https://${first_master_ip}:9345
+%{ endif ~}
+      token: "${rke2_token}"
+      node-ip: "${node_ip}"
+      tls-san:
+        - "${node_ip}"
+        - "${first_master_ip}"
+      write-kubeconfig-mode: "0644"
+      etcd-expose-metrics: true
+      disable:
+%{ for item in rke2_disable ~}
+        - ${item}
+%{ endfor ~}
+      node-label:
+        - "topology.kubernetes.io/zone=harvester"
+        - "node-role=master"
+      node-taint:
+        - "CriticalAddonsOnly=true:NoExecute"
+
+  # Longhorn prerequisites
+  - path: /etc/modules-load.d/longhorn.conf
+    content: |
+      iscsi_tcp
+      dm_crypt
+
+runcmd:
+  # Direktori data
+  - mkdir -p /data/rke2
+
+  # Install RKE2 server
+  - |
+    %{ if rke2_version != "" ~}
+    curl -sfL https://get.rke2.io | INSTALL_RKE2_TYPE=server INSTALL_RKE2_VERSION="${rke2_version}" sh -
+    %{ else ~}
+    curl -sfL https://get.rke2.io | INSTALL_RKE2_TYPE=server INSTALL_RKE2_CHANNEL=stable sh -
+    %{ endif ~}
+
+  # Enable ISCSI
+  - systemctl enable iscsid && systemctl start iscsid
+
+  # Enable và start RKE2 server
+  - systemctl enable rke2-server.service
+  - systemctl start rke2-server.service
+
+  # Chờ RKE2 API server ready (tối đa 10 phút)
+  - |
+    echo "Waiting for RKE2 to be ready..."
+    timeout=600
+    elapsed=0
+    until [ -f /var/lib/rancher/rke2/server/node-token ] && \
+          /var/lib/rancher/rke2/bin/kubectl --kubeconfig /etc/rancher/rke2/rke2.yaml get nodes &>/dev/null; do
+      if [ $elapsed -ge $timeout ]; then
+        echo "TIMEOUT: RKE2 did not start within $timeout seconds"
+        journalctl -u rke2-server.service --no-pager -n 50
+        exit 1
+      fi
+      sleep 10
+      elapsed=$((elapsed + 10))
+      echo "Waiting... ($elapsed/$timeout)"
+    done
+    echo "RKE2 control-plane is ready!"
+
+  # Setup kubectl cho user ubuntu
+  - mkdir -p /home/ubuntu/.kube
+  - cp /etc/rancher/rke2/rke2.yaml /home/ubuntu/.kube/config
+  - sed -i "s/127.0.0.1/${node_ip}/g" /home/ubuntu/.kube/config
+  - chown -R ubuntu:ubuntu /home/ubuntu/.kube
+
+  # Symlink kubectl và crictl
+  - ln -sf /var/lib/rancher/rke2/bin/kubectl /usr/local/bin/kubectl
+  - ln -sf /var/lib/rancher/rke2/bin/crictl /usr/local/bin/crictl
+
+  # Cấu hình environment
+  - |
+    cat >> /home/ubuntu/.bashrc <<'EOF'
+    export KUBECONFIG=/home/ubuntu/.kube/config
+    export CRI_CONFIG_FILE=/var/lib/rancher/rke2/agent/etc/crictl.yaml
+    alias k=kubectl
+    alias kgp='kubectl get pods -A'
+    alias kgn='kubectl get nodes -o wide'
+    EOF
+
+  # Label node
+  - |
+    kubectl label node ${hostname} \
+      node-role.kubernetes.io/control-plane=true \
+      --kubeconfig /etc/rancher/rke2/rke2.yaml --overwrite || true
+
+final_message: |
+  RKE2 master node '${hostname}' ready after $UPTIME seconds.
+  Kubeconfig: /home/ubuntu/.kube/config
+  Token file: /var/lib/rancher/rke2/server/node-token

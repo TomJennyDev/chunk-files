@@ -25,27 +25,31 @@ features:
   - icon: 🏗️
     title: System Architecture
     details: Deep dive into hexagonal architecture, Lambda processing, and distributed search implementation
-    link: /ARCHITECTURE
+    link: /application/ARCHITECTURE
   - icon: 📊
     title: Complete Workflow
     details: Understand the end-to-end flow from file upload to search with monitoring and troubleshooting
-    link: /WORKFLOW
+    link: /application/WORKFLOW
   - icon: 🔍
     title: Kibana Guide
     details: Master Kibana for searching, visualizing, and monitoring your file processing system
-    link: /KIBANA-GUIDE
+    link: /application/KIBANA-GUIDE
   - icon: ☁️
     title: AWS Cloud Architecture
     details: Production-ready AWS deployment with cost estimates, scaling strategies, and migration paths
-    link: /AWS-CLOUD-ARCHITECTURE
+    link: /application/AWS-CLOUD-ARCHITECTURE
   - icon: 🧩
     title: Chunking Strategies
     details: Industry best practices from OpenAI, Anthropic, Google, and more for optimal file chunking
-    link: /CHUNKING-STRATEGIES
+    link: /application/CHUNKING-STRATEGIES
   - icon: 📚
     title: Elasticsearch Learning
     details: Comprehensive guide from basics to enterprise-level optimization with real-world examples
     link: /elasticsearch/README
+  - icon: 📡
+    title: Observability
+    details: Full-stack observability with OpenTelemetry, Grafana, Tempo, Loki, Prometheus — traces, metrics, logs
+    link: /observability/README
   - icon: 🏢
     title: Enterprise Use Cases
     details: Learn from Amazon, Uber, and top companies - E-commerce search, log analytics, SIEM, and more
@@ -54,6 +58,10 @@ features:
     title: Performance Optimization
     details: Production-ready optimization techniques, capacity planning, and monitoring strategies
     link: /elasticsearch/OPTIMIZATION
+  - icon: 🧩
+    title: Module Docs
+    details: Dedicated docs for API, Web, MCP Server, and Infrastructure modules
+    link: /modules/README
 ---
 
 ## 📦 What's Included
@@ -65,20 +73,21 @@ This documentation covers a complete file processing system built with:
 - **Lambda Workers** - Serverless file processing
 - **Elasticsearch** - Distributed search engine
 - **Kibana** - Data visualization and monitoring
+- **Observability** - OpenTelemetry + Grafana Stack (Tempo, Loki, Prometheus)
 
 ## 🎯 For Different Audiences
 
 ### 👨‍💻 Developers
-Start with [Quick Start](/QUICKSTART) → [Workflow](/WORKFLOW) → [Kibana Guide](/KIBANA-GUIDE)
+Start with [Quick Start](/QUICKSTART) → [Workflow](/application/WORKFLOW) → [Kibana Guide](/application/KIBANA-GUIDE)
 
 ### 🏗️ Architects
-Begin with [Architecture](/ARCHITECTURE) → [AWS Cloud Architecture](/AWS-CLOUD-ARCHITECTURE) → [Elasticsearch Architecture](/elasticsearch/ARCHITECTURE)
+Begin with [Architecture](/application/ARCHITECTURE) → [AWS Cloud Architecture](/application/AWS-CLOUD-ARCHITECTURE) → [Elasticsearch Architecture](/elasticsearch/ARCHITECTURE)
 
 ### 🔧 DevOps Engineers
-Check [Quick Start](/QUICKSTART) → [Workflow](/WORKFLOW) → [Optimization](/elasticsearch/OPTIMIZATION)
+Check [Quick Start](/QUICKSTART) → [Workflow](/application/WORKFLOW) → [Optimization](/elasticsearch/OPTIMIZATION)
 
 ### 📊 Data Engineers
-Explore [Chunking Strategies](/CHUNKING-STRATEGIES) → [Elasticsearch Concepts](/elasticsearch/CONCEPTS) → [Enterprise Use Cases](/elasticsearch/ENTERPRISE-USE-CASES)
+Explore [Chunking Strategies](/application/CHUNKING-STRATEGIES) → [Elasticsearch Concepts](/elasticsearch/CONCEPTS) → [Enterprise Use Cases](/elasticsearch/ENTERPRISE-USE-CASES)
 
 ## 🌟 Key Features
 

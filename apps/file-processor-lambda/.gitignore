@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# Build & artifacts
+dist/
+*.zip
+*.tsbuildinfo
+
+# Test/debug output
+response.json
+test-output.json
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db

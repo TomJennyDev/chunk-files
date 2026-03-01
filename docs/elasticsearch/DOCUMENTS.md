@@ -1783,7 +1783,7 @@ HEAD /products/_doc/laptop-001
 - **[INDICES.md](./INDICES.md)** - Working with Elasticsearch indices
 - **[SHARDS.md](./SHARDS.md)** - Understanding sharding strategy
 - **[MAPPING.md](./MAPPING.md)** - Defining document structure
-- **[QUERIES.md](../QUERIES.md)** - Searching documents
+- **[SEARCH-IMPLEMENTATION.md](./SEARCH-IMPLEMENTATION.md)** - Searching documents
 
 ---
 

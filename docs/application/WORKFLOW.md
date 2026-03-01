@@ -88,26 +88,33 @@
 
 ### 3. **Lambda Worker** (`file-processor-lambda/`)
 - **Runtime**: Node.js 20.x
-- **Memory**: 512MB
+- **Memory**: 1024MB
 - **Timeout**: 300s
-- **Purpose**: Process files from S3, chunk into 5MB pieces, index to Elasticsearch
+- **Ephemeral Storage**: 2GB
+- **Purpose**: Process files from S3, chunk markdown by structure (headings/paragraphs) or binary by bytes, index to Elasticsearch with AI embeddings
+- **Active Handler**: `handler-markdown.js`
 - **Trigger**: SQS queue (batch size: 5)
 - **Environment Variables**:
   - `S3_BUCKET_NAME`: file-uploads
   - `ELASTICSEARCH_NODE`: http://host.docker.internal:9200
   - `ELASTICSEARCH_INDEX`: file-chunks
-  - `CHUNK_SIZE`: 5242880 (5MB)
-  - `CHUNK_OVERLAP`: 100 bytes
+  - `CHUNK_SIZE`: 1000 (chars, markdown chunking)
+  - `CHUNK_OVERLAP`: 200 (chars)
+  - `BYTE_CHUNK_SIZE`: 5242880 (5MB, binary fallback)
+  - `ENABLE_EMBEDDINGS`: true
+  - `ENABLE_TMP_CACHE`: true
 
-### 4. **Elasticsearch** (Docker Container)
+### 4. **Elasticsearch** (Docker Compose service)
 - **Port**: 9200
 - **Version**: 8.11.0
-- **Purpose**: Full-text search engine for file chunks
-- **Index**: `file-chunks`
+- **Purpose**: Full-text search engine for file chunks + vector search (embeddings)
+- **Index**: `file-chunks` (tự động tạo bởi NestJS khi startup)
+- **Cluster Name**: file-processor-cluster
 - **Configuration**:
   - Single-node cluster
   - Security disabled (dev mode)
   - Java heap: 512MB
+  - Runs inside `docker-compose.yml` (không cần `docker run` riêng)
 
 ### 5. **Terraform Infrastructure** (`terraform/file-processor/`)
 - **Purpose**: Provision LocalStack resources
@@ -129,158 +136,53 @@
 - Docker Desktop
 - Node.js 20.x
 - pnpm (hoặc npm)
-- Terraform >= 1.9.0
 - AWS CLI v2
 - Git Bash (Windows)
+# Optional:
+# - Terraform >= 1.9.0 (chỉ cần nếu dùng Terraform deploy)
 ```
 
-### Step 1: Start LocalStack
+### Step 1: Start All Infrastructure
+
+> Docker Compose khởi động **LocalStack**, **Elasticsearch**, và **Kibana**.
+> S3 bucket và SQS queue được tạo tự động bởi `init-aws.sh`.
 
 ```bash
 cd d:/devops/terraform/terraform-eks/localstack
 
-# Start LocalStack container
-docker compose up -d localstack
+# Start all infrastructure
+docker compose up -d
 
 # Verify LocalStack is running
 docker compose ps
 curl http://localhost:4566/_localstack/health
 
-# Expected output:
-# {
-#   "services": {
-#     "s3": "running",
-#     "sqs": "running",
-#     "lambda": "running",
-#     ...
-#   }
-# }
-```
-
-### Step 2: Provision Infrastructure with Terraform
-
-```bash
-cd terraform/file-processor
-
-# Initialize Terraform
-terraform init
-
-# Review plan
-terraform plan
-
-# Apply infrastructure
-terraform apply -auto-approve
-
-# Verify resources created
-terraform output
-
-# Expected outputs:
-# - s3_bucket_name = "file-uploads"
-# - sqs_queue_url = "http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/file-processing-queue"
-# - lambda_function_name = "file-processor-worker"
-# - opensearch_endpoint (not used)
-```
-
-### Step 3: Start Elasticsearch Container
-
-```bash
-# Run Elasticsearch (single-node, dev mode)
-docker run -d \
-  --name elasticsearch-local \
-  -p 9200:9200 \
-  -e "discovery.type=single-node" \
-  -e "xpack.security.enabled=false" \
-  -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" \
-  docker.elastic.co/elasticsearch/elasticsearch:8.11.0
-
-# Verify Elasticsearch is running
+# Verify Elasticsearch
 curl http://localhost:9200
-
-# Expected output:
-# {
-#   "name" : "...",
-#   "cluster_name" : "docker-cluster",
-#   "version" : { "number" : "8.11.0" },
-#   ...
-# }
 ```
 
-### Step 4: Create Elasticsearch Index
+### Step 2: Deploy Lambda
+
+> Có thể dùng **Terraform** hoặc **deploy.sh** trực tiếp.
 
 ```bash
-# Create index with proper mapping
-curl -X PUT "http://localhost:9200/file-chunks" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "mappings": {
-      "properties": {
-        "fileId": { "type": "keyword" },
-        "chunkIndex": { "type": "long" },
-        "content": { "type": "text" },
-        "startByte": { "type": "long" },
-        "endByte": { "type": "long" },
-        "fileName": { "type": "keyword" },
-        "metadata": {
-          "properties": {
-            "fileName": { "type": "keyword" },
-            "fileSize": { "type": "long" },
-            "chunkSize": { "type": "long" }
-          }
-        }
-      }
-    }
-  }'
+# Option A: Terraform
+cd terraform/file-processor
+terraform init && terraform apply -auto-approve
 
-# Verify index created
-curl "http://localhost:9200/_cat/indices?v"
-
-# Expected output:
-# health status index       pri rep docs.count ...
-# yellow open   file-chunks   1   1          0 ...
-```
-
-### Step 5: Deploy Lambda Function
-
-```bash
-cd ../file-processor-lambda
-
-# Deploy Lambda (creates package and uploads to LocalStack)
+# Option B: deploy.sh (không cần Terraform)
+cd file-processor-lambda
 bash deploy.sh
-
-# Expected output:
-# 🚀 Deploying Lambda function to LocalStack...
-# 📦 Creating deployment package...
-# ✅ Package created: lambda-function.zip (9.63 MB)
-# 🔑 Creating IAM role...
-# 🆕 Creating Lambda function...
-# 🔗 Creating SQS trigger...
-# ✅ Lambda function deployed successfully!
 ```
 
-### Step 6: Update Lambda Environment for Elasticsearch
+> `deploy.sh` đã tự động cấu hình đầy đủ environment variables cho Lambda:
+> - `ELASTICSEARCH_NODE=http://host.docker.internal:9200`
+> - `CHUNK_SIZE=1000`, `CHUNK_OVERLAP=200`
+> - `ENABLE_EMBEDDINGS=true`, `ENABLE_TMP_CACHE=true`
 
-```bash
-# Update Lambda to point to real Elasticsearch
-AWS_DEFAULT_REGION=us-east-1 aws --endpoint-url=http://localhost:4566 \
-  lambda update-function-configuration \
-  --function-name file-processor-worker \
-  --environment 'Variables={
-    AWS_REGION=us-east-1,
-    S3_BUCKET_NAME=file-uploads,
-    ELASTICSEARCH_NODE=http://host.docker.internal:9200,
-    ELASTICSEARCH_INDEX=file-chunks,
-    CHUNK_SIZE=5242880,
-    CHUNK_OVERLAP=100
-  }'
+### Step 3: Start NestJS API
 
-# Verify environment variables
-AWS_DEFAULT_REGION=us-east-1 aws --endpoint-url=http://localhost:4566 \
-  lambda get-function-configuration \
-  --function-name file-processor-worker \
-  --query 'Environment.Variables'
-```
-
-### Step 7: Start NestJS API
+> **Quan trọng**: NestJS sẽ tự động tạo Elasticsearch index `file-chunks` khi startup (không cần tạo thủ công).
 
 ```bash
 cd ../file-processor
@@ -378,7 +280,7 @@ exports.handler = async (event) => {
     const fileBuffer = await downloadFromS3(message.s3Key);
     // Uses AWS_ENDPOINT_URL from LocalStack (http://172.19.0.2:4566)
     
-    // Step 2: Chunk file (5MB chunks with 100 bytes overlap)
+    // Step 2: Chunk file (markdown: 1000 chars / binary: 5MB)
     const chunks = chunkFile(fileBuffer, message);
     
     // Step 3: Bulk index to Elasticsearch
@@ -393,35 +295,43 @@ exports.handler = async (event) => {
 **Processing details:**
 
 ```javascript
-// Chunking algorithm
+// Chunking algorithm (handler-markdown.js)
+// Markdown files: chunk by headings/paragraphs with CHUNK_SIZE=1000 chars, CHUNK_OVERLAP=200 chars
+// Non-markdown files: chunk by bytes with BYTE_CHUNK_SIZE=5MB, BYTE_CHUNK_OVERLAP=100 bytes
 function chunkFile(buffer, message) {
   const chunks = [];
-  const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB
-  const CHUNK_OVERLAP = 100; // bytes
+  const isMarkdown = (message.mimeType || message.contentType || '').includes('markdown') 
+    || (message.fileName || '').endsWith('.md');
   
-  let startByte = 0;
-  let chunkIndex = 0;
-  
-  while (startByte < buffer.length) {
-    const endByte = Math.min(startByte + CHUNK_SIZE, buffer.length);
-    const chunkContent = buffer.slice(startByte, endByte).toString('utf-8');
+  if (isMarkdown) {
+    // Markdown chunking: split by headings/paragraphs
+    const CHUNK_SIZE = parseInt(process.env.CHUNK_SIZE) || 1000;  // chars
+    const CHUNK_OVERLAP = parseInt(process.env.CHUNK_OVERLAP) || 200;
+    const content = buffer.toString('utf-8');
+    // ... smart markdown splitting by headings ...
+  } else {
+    // Binary chunking: split by bytes
+    const BYTE_CHUNK_SIZE = parseInt(process.env.BYTE_CHUNK_SIZE) || 5 * 1024 * 1024;
+    const BYTE_CHUNK_OVERLAP = parseInt(process.env.BYTE_CHUNK_OVERLAP) || 100;
+    let startByte = 0;
+    let chunkIndex = 0;
     
-    chunks.push({
-      fileId: message.fileId,
-      chunkIndex: chunkIndex,
-      content: chunkContent,
-      startByte: startByte,
-      endByte: endByte,
-      fileName: message.fileName,
-      metadata: {
+    while (startByte < buffer.length) {
+      const endByte = Math.min(startByte + BYTE_CHUNK_SIZE, buffer.length);
+      const chunkContent = buffer.slice(startByte, endByte).toString('utf-8');
+      
+      chunks.push({
+        fileId: message.fileId,
+        chunkIndex: chunkIndex,
+        content: chunkContent,
+        startByte: startByte,
+        endByte: endByte,
         fileName: message.fileName,
-        fileSize: message.fileSize,
-        chunkSize: endByte - startByte
-      }
-    });
-    
-    chunkIndex++;
-    startByte = endByte - CHUNK_OVERLAP;
+      });
+      
+      chunkIndex++;
+      startByte = endByte - BYTE_CHUNK_OVERLAP;
+    }
   }
   
   return chunks;
@@ -613,11 +523,11 @@ docker compose logs -f localstack
 # View LocalStack logs (recent Lambda execution)
 docker compose logs localstack --tail 50 | grep -i "lambda\|error"
 
-# View Elasticsearch logs
-docker logs elasticsearch-local -f
+# View Elasticsearch logs (now in docker compose)
+docker compose logs -f elasticsearch
 
 # Container stats
-docker stats localstack elasticsearch-local
+docker stats
 ```
 
 ---
@@ -726,30 +636,18 @@ async function indexChunks(chunks) {
 
 **Root Cause:** LocalStack Community edition's OpenSearch is incompatible with Elasticsearch client v8
 
-**Solution:** Use real Elasticsearch container instead of LocalStack OpenSearch
+**Solution:** Use real Elasticsearch container (now included in `docker-compose.yml`)
 
 ```bash
-# Start real Elasticsearch
-docker run -d \
-  --name elasticsearch-local \
-  -p 9200:9200 \
-  -e "discovery.type=single-node" \
-  -e "xpack.security.enabled=false" \
-  -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" \
-  docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+# Elasticsearch is already in docker-compose.yml
+# Just run:
+docker compose up -d
 
-# Update .env
-ELASTICSEARCH_NODE=http://localhost:9200
+# Verify
+curl http://localhost:9200
 
-# Update Lambda environment
-AWS_DEFAULT_REGION=us-east-1 aws --endpoint-url=http://localhost:4566 \
-  lambda update-function-configuration \
-  --function-name file-processor-worker \
-  --environment 'Variables={
-    ...,
-    ELASTICSEARCH_NODE=http://host.docker.internal:9200,
-    ...
-  }'
+# ES index is auto-created by NestJS on startup
+# Lambda deploy.sh already sets correct ELASTICSEARCH_NODE
 ```
 
 ### Issue 5: Search returns 0 results
@@ -855,8 +753,8 @@ ELASTICSEARCH_REQUEST_TIMEOUT=30000
 
 # File Processing
 MAX_FILE_SIZE=524288000  # 500MB
-CHUNK_SIZE=5242880       # 5MB
-CHUNK_OVERLAP=100        # 100 bytes
+CHUNK_SIZE=1000          # 1000 chars (markdown)
+CHUNK_OVERLAP=200        # 200 chars overlap
 
 # Application
 PORT=3000
@@ -870,8 +768,11 @@ NODE_ENV=development
   S3_BUCKET_NAME: "file-uploads",
   ELASTICSEARCH_NODE: "http://host.docker.internal:9200",
   ELASTICSEARCH_INDEX: "file-chunks",
-  CHUNK_SIZE: "5242880",
-  CHUNK_OVERLAP: "100"
+  CHUNK_SIZE: "1000",         // chars (markdown)
+  CHUNK_OVERLAP: "200",       // chars
+  BYTE_CHUNK_SIZE: "5242880", // 5MB (binary fallback)
+  ENABLE_EMBEDDINGS: "true",
+  ENABLE_TMP_CACHE: "true"
 }
 // Note: AWS_ENDPOINT_URL is injected by LocalStack
 ```
@@ -888,11 +789,14 @@ NODE_ENV=development
 
 | Configuration | Default | Description |
 |---------------|---------|-------------|
-| Lambda Memory | 512MB | Sufficient for 5MB chunks |
+| Lambda Memory | 1024MB | Sufficient for AI embeddings + file processing |
 | Lambda Timeout | 300s | 5 minutes for large files |
+| Ephemeral Storage | 2GB | For AI model cache |
 | SQS Batch Size | 5 | Process up to 5 files per invocation |
-| Chunk Size | 5MB | Balance between search performance and memory |
-| Chunk Overlap | 100 bytes | Avoid cutting words/sentences |
+| Chunk Size (Markdown) | 1000 chars | Smart chunking by headings/paragraphs |
+| Chunk Size (Binary) | 5MB | Byte-level chunking for non-markdown files |
+| Chunk Overlap (Markdown) | 200 chars | Context preservation between chunks |
+| Chunk Overlap (Binary) | 100 bytes | Avoid cutting words/sentences |
 | Max File Size | 500MB | API upload limit |
 
 ---
@@ -971,6 +875,6 @@ NODE_ENV=development
 
 ---
 
-**Last Updated**: January 25, 2026  
-**Version**: 1.0  
+**Last Updated**: February 18, 2026  
+**Version**: 2.0  
 **Status**: ✅ Fully Working

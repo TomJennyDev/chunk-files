@@ -1,0 +1,79 @@
+# ============================================
+# Terraform Variables — Example/Template
+# Copy to terraform.tfvars and customize
+# ============================================
+
+# ---- Harvester Connection ----
+harvester_kubeconfig   = "~/.kube/harvester.yaml"   # kubectl get secret -n cattle-system harvester-kubeconfig-xxx -o yaml
+harvester_kube_context = "local"                     # default context trong Harvester kubeconfig
+guest_kubeconfig       = "~/.kube/config"
+guest_kube_context     = "default"
+
+# ---- Project ----
+project_name = "chunk-files"
+environment  = "dev"
+namespace    = "chunk-files"
+
+# ---- Harvester VM / RKE2 Cluster ----
+harvester_namespace = "default"
+
+# Cluster topology
+master_count = 1          # 1 = dev/single-node | 3 = HA production (dùng số lẻ)
+worker_count = 2          # Scale bằng cách tăng số này + terraform apply
+
+# Static IPs — phải match với VLAN/subnet của Harvester network
+master_ips = ["192.168.100.10", "192.168.100.11", "192.168.100.12"]
+worker_ips = ["192.168.100.20", "192.168.100.21", "192.168.100.22", "192.168.100.23"]
+ip_cidr    = "24"
+ip_gateway = "192.168.100.1"
+ip_dns     = "1.1.1.1"
+
+# Master node resources
+master_cpu       = 4
+master_memory    = 8     # GiB
+master_disk_size = 50    # GiB root disk
+
+# Worker node resources
+worker_cpu       = 4
+worker_memory    = 8     # GiB
+worker_disk_size = 50    # GiB root disk
+
+vm_data_disk_size = 100  # GiB data disk (K8s PVs — áp dụng cho TẤT CẢ nodes)
+
+vm_image_name = "ubuntu-22-04-server"
+vm_image_url  = "https://cloud-images.ubuntu.com/releases/22.04/release/ubuntu-22.04-server-cloudimg-amd64.img"
+vm_network_name = "chunk-files-net"
+vm_vlan_id      = 0      # 0 = untagged; đặt VLAN ID nếu cần tách mạng
+
+ssh_public_key = ""      # Paste nội dung ~/.ssh/id_rsa.pub
+
+# RKE2
+rke2_token   = ""        # Sinh ngẫu nhiên: openssl rand -hex 32
+rke2_version = ""        # Để trống = stable channel. Hoặc "v1.30.4+rke2r1"
+rke2_disable = ["rke2-ingress-nginx"]  # Disable ingress nginx mặc định
+
+# ---- Elasticsearch ----
+elasticsearch_version  = "8.11.0"
+elasticsearch_java_opts = "-Xms512m -Xmx512m"
+elasticsearch_storage_size = "10Gi"
+
+# ---- LocalStack ----
+localstack_services = "s3,sqs,opensearch,kms,iam,logs,lambda"
+
+# ---- Observability ----
+grafana_admin_password     = "admin"      # Change in prod!
+observability_retention    = "48h"
+observability_storage_size = "5Gi"
+
+# ---- Application ----
+api_replicas = 1
+api_image    = "chunk-files/api:latest"
+web_image    = "chunk-files/web:latest"
+
+# ---- Tags ----
+# tags = {
+#   Project   = "chunk-files"
+#   ManagedBy = "terraform"
+#   Platform  = "harvester"
+#   Team      = "your-team"
+# }

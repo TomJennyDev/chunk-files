@@ -864,7 +864,7 @@ Now query `files` instead of `file-chunks`
 ### Your System Docs
 - [WORKFLOW.md](./WORKFLOW.md) - Complete workflow
 - [ARCHITECTURE.md](./ARCHITECTURE.md) - System architecture
-- [QUICKSTART.md](./QUICKSTART.md) - Setup guide
+- [QUICKSTART.md](../QUICKSTART.md) - Setup guide
 
 ---
 

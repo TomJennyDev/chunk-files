@@ -20,7 +20,7 @@ New to the system? Start here:
 ## 📖 Core Documentation
 
 ### Complete Workflow Guide
-- **[WORKFLOW.md](./WORKFLOW.md)** - End-to-end system workflow
+- **[WORKFLOW.md](./application/WORKFLOW.md)** - End-to-end system workflow
   - Architecture overview with diagrams
   - Component descriptions
   - Complete setup guide
@@ -33,7 +33,7 @@ New to the system? Start here:
 **Perfect for**: Understanding how everything works together, deployment guide
 
 ### System Architecture
-- **[ARCHITECTURE.md](./ARCHITECTURE.md)** - Deep dive into system design
+- **[ARCHITECTURE.md](./application/ARCHITECTURE.md)** - Deep dive into system design
   - High-level architecture diagrams
   - Component details (API, Lambda, Storage)
   - Data flow diagrams (Upload, Processing, Search)
@@ -56,7 +56,7 @@ New to the system? Start here:
 **Perfect for**: Developers implementing AI features, understanding Lambda internals
 
 ### Kibana User Guide
-- **[KIBANA-GUIDE.md](./KIBANA-GUIDE.md)** - Complete Kibana usage guide
+- **[KIBANA-GUIDE.md](./application/KIBANA-GUIDE.md)** - Complete Kibana usage guide
   - First-time setup (Data Views)
   - Discover tab - search files and chunks
   - Dev Tools - advanced queries
@@ -67,6 +67,15 @@ New to the system? Start here:
   - Performance analysis
 
 **Perfect for**: Anyone using Kibana to search and monitor the file processing system
+
+### Module Documentation (NEW)
+- **[Modules Index](./modules/README.md)** - Focused documentation by module
+  - [API Service](./modules/API.md)
+  - [Web Frontend](./modules/WEB.md)
+  - [MCP Server](./modules/MCP-SERVER.md)
+  - [Infrastructure](./modules/INFRASTRUCTURE.md)
+
+**Perfect for**: Team members working on a specific package or service
 
 ---
 
@@ -97,23 +106,23 @@ New to the system? Start here:
 
 #### 👨‍💻 **Developers**
 1. Start with [QUICKSTART.md](./QUICKSTART.md) to set up your environment
-2. Read [WORKFLOW.md](./WORKFLOW.md) to understand the flow
-3. Use [KIBANA-GUIDE.md](./KIBANA-GUIDE.md) to search and debug
-4. Refer to [ARCHITECTURE.md](./ARCHITECTURE.md) for implementation details
+2. Read [WORKFLOW.md](./application/WORKFLOW.md) to understand the flow
+3. Use [KIBANA-GUIDE.md](./application/KIBANA-GUIDE.md) to search and debug
+4. Refer to [ARCHITECTURE.md](./application/ARCHITECTURE.md) for implementation details
 
 #### 🏗️ **Architects**
-1. Begin with [ARCHITECTURE.md](./ARCHITECTURE.md) for design overview
-2. Review [WORKFLOW.md](./WORKFLOW.md) for operational details
+1. Begin with [ARCHITECTURE.md](./application/ARCHITECTURE.md) for design overview
+2. Review [WORKFLOW.md](./application/WORKFLOW.md) for operational details
 3. Check [QUICKSTART.md](./QUICKSTART.md) for quick validation
 
 #### 🔧 **DevOps Engineers**
 1. Follow [QUICKSTART.md](./QUICKSTART.md) for infrastructure setup
-2. Study [WORKFLOW.md](./WORKFLOW.md) for monitoring and troubleshooting
-3. Review [ARCHITECTURE.md](./ARCHITECTURE.md) for scalability considerations
+2. Study [WORKFLOW.md](./application/WORKFLOW.md) for monitoring and troubleshooting
+3. Review [ARCHITECTURE.md](./application/ARCHITECTURE.md) for scalability considerations
 
 #### 📝 **Technical Writers / Product Managers**
 1. Start with this README for overview
-2. Read [WORKFLOW.md](./WORKFLOW.md) for feature understanding
+2. Read [WORKFLOW.md](./application/WORKFLOW.md) for feature understanding
 3. Refer to [QUICKSTART.md](./QUICKSTART.md) for demo preparation
 
 ---
@@ -126,17 +135,17 @@ New to the system? Start here:
 |------|---------------|
 | **Set up the system** | [QUICKSTART.md](./QUICKSTART.md) → Steps 1-6 |
 | **Upload a file** | [QUICKSTART.md](./QUICKSTART.md) → Test Section |
-| **Search files** | [WORKFLOW.md](./WORKFLOW.md) → API Usage |
-| **Use Kibana UI** | [KIBANA-GUIDE.md](./KIBANA-GUIDE.md) → First Time Setup |
-| **Search in Kibana** | [KIBANA-GUIDE.md](./KIBANA-GUIDE.md) → Discover |
-| **Create dashboards** | [KIBANA-GUIDE.md](./KIBANA-GUIDE.md) → Dashboard Creation |
-| **Troubleshoot errors** | [WORKFLOW.md](./WORKFLOW.md) → Troubleshooting |
-| **Understand architecture** | [ARCHITECTURE.md](./ARCHITECTURE.md) → Architecture Overview |
+| **Search files** | [WORKFLOW.md](./application/WORKFLOW.md) → API Usage |
+| **Use Kibana UI** | [KIBANA-GUIDE.md](./application/KIBANA-GUIDE.md) → First Time Setup |
+| **Search in Kibana** | [KIBANA-GUIDE.md](./application/KIBANA-GUIDE.md) → Discover |
+| **Create dashboards** | [KIBANA-GUIDE.md](./application/KIBANA-GUIDE.md) → Dashboard Creation |
+| **Troubleshoot errors** | [WORKFLOW.md](./application/WORKFLOW.md) → Troubleshooting |
+| **Understand architecture** | [ARCHITECTURE.md](./application/ARCHITECTURE.md) → Architecture Overview |
 | **Lambda flow details** | [application/LAMBDA-FLOW-SEQUENCE.md](./application/LAMBDA-FLOW-SEQUENCE.md) → Sequence Diagrams |
 | **AI search features** | [application/README-MARKDOWN-AI.md](./application/README-MARKDOWN-AI.md) → Features |
-| **Scale the system** | [ARCHITECTURE.md](./ARCHITECTURE.md) → Scalability |
-| **Security hardening** | [ARCHITECTURE.md](./ARCHITECTURE.md) → Security |
-| **Monitor services** | [WORKFLOW.md](./WORKFLOW.md) → Monitoring |
+| **Scale the system** | [ARCHITECTURE.md](./application/ARCHITECTURE.md) → Scalability |
+| **Security hardening** | [ARCHITECTURE.md](./application/ARCHITECTURE.md) → Security |
+| **Monitor services** | [WORKFLOW.md](./application/WORKFLOW.md) → Monitoring |
 
 ---
 
@@ -147,19 +156,19 @@ Looking for specific information?
 ### Keywords Index
 
 - **Setup**: [QUICKSTART.md](./QUICKSTART.md)
-- **Docker**: [QUICKSTART.md](./QUICKSTART.md), [WORKFLOW.md](./WORKFLOW.md)
-- **LocalStack**: [QUICKSTART.md](./QUICKSTART.md), [WORKFLOW.md](./WORKFLOW.md)
-- **Terraform**: [WORKFLOW.md](./WORKFLOW.md) → Setup Guide
-- **Lambda**: [ARCHITECTURE.md](./ARCHITECTURE.md) → Lambda Worker, [WORKFLOW.md](./WORKFLOW.md) → Processing
-- **Elasticsearch**: [WORKFLOW.md](./WORKFLOW.md) → Storage Layer, [ARCHITECTURE.md](./ARCHITECTURE.md)
-- **Kibana**: [KIBANA-GUIDE.md](./KIBANA-GUIDE.md) → Complete usage guide
-- **Search Queries**: [KIBANA-GUIDE.md](./KIBANA-GUIDE.md) → Dev Tools
-- **Visualizations**: [KIBANA-GUIDE.md](./KIBANA-GUIDE.md) → Visualizations & Dashboards
-- **API Endpoints**: [QUICKSTART.md](./QUICKSTART.md) → API Endpoints, [WORKFLOW.md](./WORKFLOW.md)
-- **Troubleshooting**: [QUICKSTART.md](./QUICKSTART.md) → Common Issues, [WORKFLOW.md](./WORKFLOW.md) → Troubleshooting, [KIBANA-GUIDE.md](./KIBANA-GUIDE.md) → Troubleshooting
-- **Security**: [ARCHITECTURE.md](./ARCHITECTURE.md) → Security Architecture
-- **Scaling**: [ARCHITECTURE.md](./ARCHITECTURE.md) → Scalability
-- **Configuration**: [WORKFLOW.md](./WORKFLOW.md) → Configuration Reference
+- **Docker**: [QUICKSTART.md](./QUICKSTART.md), [WORKFLOW.md](./application/WORKFLOW.md)
+- **LocalStack**: [QUICKSTART.md](./QUICKSTART.md), [WORKFLOW.md](./application/WORKFLOW.md)
+- **Terraform**: [WORKFLOW.md](./application/WORKFLOW.md) → Setup Guide
+- **Lambda**: [ARCHITECTURE.md](./application/ARCHITECTURE.md) → Lambda Worker, [WORKFLOW.md](./application/WORKFLOW.md) → Processing
+- **Elasticsearch**: [WORKFLOW.md](./application/WORKFLOW.md) → Storage Layer, [ARCHITECTURE.md](./application/ARCHITECTURE.md)
+- **Kibana**: [KIBANA-GUIDE.md](./application/KIBANA-GUIDE.md) → Complete usage guide
+- **Search Queries**: [KIBANA-GUIDE.md](./application/KIBANA-GUIDE.md) → Dev Tools
+- **Visualizations**: [KIBANA-GUIDE.md](./application/KIBANA-GUIDE.md) → Visualizations & Dashboards
+- **API Endpoints**: [QUICKSTART.md](./QUICKSTART.md) → API Endpoints, [WORKFLOW.md](./application/WORKFLOW.md)
+- **Troubleshooting**: [QUICKSTART.md](./QUICKSTART.md) → Common Issues, [WORKFLOW.md](./application/WORKFLOW.md) → Troubleshooting, [KIBANA-GUIDE.md](./application/KIBANA-GUIDE.md) → Troubleshooting
+- **Security**: [ARCHITECTURE.md](./application/ARCHITECTURE.md) → Security Architecture
+- **Scaling**: [ARCHITECTURE.md](./application/ARCHITECTURE.md) → Scalability
+- **Configuration**: [WORKFLOW.md](./application/WORKFLOW.md) → Configuration Reference
 
 ---
 
@@ -228,7 +237,7 @@ localstack/
 4. ✅ Explore API endpoints with Swagger
 
 **Week 2: Understanding Components**
-1. ✅ Read [WORKFLOW.md](./WORKFLOW.md) sections:
+1. ✅ Read [WORKFLOW.md](./application/WORKFLOW.md) sections:
    - Components
    - Complete Workflow
    - Monitoring
@@ -238,7 +247,7 @@ localstack/
 ### Intermediate (2-4 weeks)
 
 **Week 3: Deep Dive**
-1. ✅ Study [ARCHITECTURE.md](./ARCHITECTURE.md):
+1. ✅ Study [ARCHITECTURE.md](./application/ARCHITECTURE.md):
    - Hexagonal Architecture pattern
    - Data flow diagrams
    - Component interactions
@@ -257,7 +266,7 @@ localstack/
 ### Advanced (1-2 months)
 
 **Month 2: Production Preparation**
-1. ✅ Security hardening (see [ARCHITECTURE.md](./ARCHITECTURE.md) → Security)
+1. ✅ Security hardening (see [ARCHITECTURE.md](./application/ARCHITECTURE.md) → Security)
 2. ✅ Performance optimization
 3. ✅ Monitoring & alerting setup
 4. ✅ Migration from LocalStack to AWS
@@ -363,14 +372,14 @@ docker logs -f elasticsearch-local
 
 1. **Troubleshooting Guides**
    - [QUICKSTART.md](./QUICKSTART.md) → Common Issues
-   - [WORKFLOW.md](./WORKFLOW.md) → Troubleshooting
+   - [WORKFLOW.md](./application/WORKFLOW.md) → Troubleshooting
 
 2. **Code Examples**
-   - [WORKFLOW.md](./WORKFLOW.md) → API Usage
+   - [WORKFLOW.md](./application/WORKFLOW.md) → API Usage
    - [QUICKSTART.md](./QUICKSTART.md) → Test Section
 
 3. **Architecture Details**
-   - [ARCHITECTURE.md](./ARCHITECTURE.md) → All sections
+   - [ARCHITECTURE.md](./application/ARCHITECTURE.md) → All sections
 
 ### Getting Help
 

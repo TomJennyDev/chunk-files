@@ -8,30 +8,37 @@ Before starting, ensure you have:
 ✅ Docker Desktop installed and running
 ✅ Node.js 20.x or later
 ✅ pnpm (or npm) package manager
-✅ Terraform >= 1.9.0
 ✅ AWS CLI v2
 ✅ Git Bash (for Windows users)
-✅ 8GB+ RAM available
+✅ 4GB+ RAM available
 ✅ 10GB+ free disk space
+# Optional:
+# ✅ Terraform >= 1.9.0 (chỉ cần nếu dùng Terraform deploy)
 ```
 
 ---
 
 ## ⚡ 5-Minute Setup
 
-### 1. Start LocalStack (30 seconds)
+### 1. Start All Infrastructure (1 minute)
+
+> Docker Compose sẽ khởi động **LocalStack**, **Elasticsearch 8.11.0**, và **Kibana** cùng lúc.
+> S3 bucket và SQS queue được tạo tự động bởi `init-aws.sh`.
 
 ```bash
 cd d:/devops/terraform/terraform-eks/localstack
 
-# Start LocalStack container
-docker compose up -d localstack
+# Start all infrastructure services
+docker compose up -d
 
-# Verify it's running
+# Verify LocalStack
 curl http://localhost:4566/_localstack/health
+
+# Verify Elasticsearch
+curl http://localhost:9200
 ```
 
-**Expected output:**
+**Expected output (LocalStack):**
 ```json
 {
   "services": {
@@ -45,103 +52,31 @@ curl http://localhost:4566/_localstack/health
 
 ### 2. Provision Infrastructure (2 minutes)
 
+> **Option A: Dùng Terraform** (nếu đã cài Terraform)
 ```bash
 cd terraform/file-processor
-
-# Initialize and apply
 terraform init
 terraform apply -auto-approve
-
-# Verify outputs
 terraform output
 ```
 
-**Expected outputs:**
-```
-s3_bucket_name = "file-uploads"
-sqs_queue_url = "http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/file-processing-queue"
-lambda_function_name = "file-processor-worker"
-```
-
-### 3. Start Elasticsearch (30 seconds)
-
+> **Option B: Dùng deploy.sh** (không cần Terraform)
 ```bash
-docker run -d \
-  --name elasticsearch-local \
-  -p 9200:9200 \
-  -e "discovery.type=single-node" \
-  -e "xpack.security.enabled=false" \
-  -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" \
-  docker.elastic.co/elasticsearch/elasticsearch:8.11.0
-
-# Wait for it to start
-sleep 10
-
-# Verify
-curl http://localhost:9200
-```
-
-### 4. Create Elasticsearch Index (10 seconds)
-
-```bash
-curl -X PUT "http://localhost:9200/file-chunks" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "mappings": {
-      "properties": {
-        "fileId": {"type": "keyword"},
-        "chunkIndex": {"type": "long"},
-        "content": {"type": "text"},
-        "startByte": {"type": "long"},
-        "endByte": {"type": "long"},
-        "fileName": {"type": "keyword"},
-        "metadata": {
-          "properties": {
-            "fileName": {"type": "keyword"},
-            "fileSize": {"type": "long"},
-            "chunkSize": {"type": "long"}
-          }
-        }
-      }
-    }
-  }'
-
-# Verify index created
-curl "http://localhost:9200/_cat/indices?v"
-```
-
-### 5. Deploy Lambda (30 seconds)
-
-```bash
-cd ../file-processor-lambda
-
-# Deploy
+cd file-processor-lambda
 bash deploy.sh
-
-# Update Lambda environment for Elasticsearch
-AWS_DEFAULT_REGION=us-east-1 aws --endpoint-url=http://localhost:4566 \
-  lambda update-function-configuration \
-  --function-name file-processor-worker \
-  --environment 'Variables={
-    AWS_REGION=us-east-1,
-    S3_BUCKET_NAME=file-uploads,
-    ELASTICSEARCH_NODE=http://host.docker.internal:9200,
-    ELASTICSEARCH_INDEX=file-chunks,
-    CHUNK_SIZE=5242880,
-    CHUNK_OVERLAP=100
-  }'
 ```
 
-### 6. Start API (1 minute)
+> **Lưu ý**: S3 bucket `file-uploads` và SQS queue `file-processing-queue` đã được tạo tự động bởi `init-aws.sh` khi docker compose start. Deploy.sh chỉ tạo Lambda function.
+
+### 3. Start API (1 minute)
+
+> **Quan trọng**: Start API **trước** khi test. NestJS sẽ tự động tạo Elasticsearch index `file-chunks` với proper mappings khi startup.
 
 ```bash
-cd ../file-processor
+cd file-processor
 
 # Install dependencies (first time only)
 pnpm install
-
-# Check .env file
-cat .env
 
 # Start in development mode
 pnpm run start:dev
@@ -151,6 +86,25 @@ pnpm run start:dev
 ```
 [Nest] LOG [Bootstrap] 🚀 Application is running on: http://localhost:3000
 ```
+
+> **Lưu ý**: Kiểm tra `.env` phải có `ELASTICSEARCH_NODE=http://localhost:9200`
+
+### 4. Deploy Lambda (30 seconds)
+
+```bash
+cd ../file-processor-lambda
+
+# Deploy
+bash deploy.sh
+
+```
+
+> **Lưu ý**: `deploy.sh` đã tự động cấu hình Lambda environment variables:
+> - `ELASTICSEARCH_NODE=http://host.docker.internal:9200`
+> - `CHUNK_SIZE=1000` (chars cho markdown)
+> - `CHUNK_OVERLAP=200` (chars)
+> - `ENABLE_EMBEDDINGS=true`
+> Không cần chạy `lambda update-function-configuration` thủ công.
 
 ---
 
@@ -254,8 +208,8 @@ curl "http://localhost:3000/files/search?text=monitoring"
 Your system is working if:
 
 - ✅ LocalStack health check shows all services running
-- ✅ Terraform created S3 bucket, SQS queue, and Lambda function
-- ✅ Elasticsearch index "file-chunks" exists
+- ✅ S3 bucket và SQS queue được tạo tự động bởi init-aws.sh
+- ✅ Elasticsearch index "file-chunks" tự động tạo khi API start
 - ✅ Lambda is connected to SQS (event source mapping)
 - ✅ API starts without errors on port 3000
 - ✅ File upload returns 201 status
@@ -305,14 +259,11 @@ curl "http://localhost:9200/file-chunks/_count"
 ### Issue: Port 4566 already in use
 
 ```bash
-# Stop existing LocalStack
+# Stop all services
 docker compose down
 
-# Or force kill
-docker stop localstack && docker rm localstack
-
 # Start again
-docker compose up -d localstack
+docker compose up -d
 ```
 
 ### Issue: Port 3000 already in use
@@ -327,15 +278,15 @@ netstat -ano | findstr :3000
 ### Issue: Elasticsearch not starting
 
 ```bash
-# Check container
-docker logs elasticsearch-local
+# Check container (ES runs inside docker compose)
+docker compose logs elasticsearch
 
-# Remove and recreate
-docker stop elasticsearch-local
-docker rm elasticsearch-local
+# Restart chỉ ES
+docker compose restart elasticsearch
 
-# Start again (from step 3)
-docker run -d --name elasticsearch-local ...
+# Nếu cần restart toàn bộ
+docker compose down -v
+docker compose up -d
 ```
 
 ### Issue: File uploaded but count = 0
@@ -424,8 +375,8 @@ pnpm run start:dev
 cd localstack
 docker compose logs -f localstack
 
-# Elasticsearch logs
-docker logs -f elasticsearch-local
+# Elasticsearch logs (now in docker compose)
+docker compose logs -f elasticsearch
 
 # API logs
 # Already displayed in terminal where you ran pnpm run start:dev
@@ -435,22 +386,21 @@ docker logs -f elasticsearch-local
 
 ```bash
 # Stop everything
-docker compose down
-docker stop elasticsearch-local
+docker compose down -v
 
 # Clean data (optional)
 rm -rf localstack-data/*
 
-# Start fresh
-docker compose up -d localstack
-docker start elasticsearch-local
-
-# Recreate index
-curl -X PUT "http://localhost:9200/file-chunks" -H "Content-Type: application/json" -d '{...}'
+# Start fresh (ES index sẽ được NestJS tự động tạo lại khi start API)
+docker compose up -d
 
 # Redeploy Lambda
 cd file-processor-lambda
 bash deploy.sh
+
+# Start API
+cd ../file-processor
+pnpm run start:dev
 ```
 
 ---
@@ -460,9 +410,8 @@ bash deploy.sh
 Once everything is working:
 
 1. **Read Documentation**
-   - [`WORKFLOW.md`](./WORKFLOW.md) - Complete workflow guide
-   - [`ARCHITECTURE.md`](./ARCHITECTURE.md) - System architecture
-   - [`TROUBLESHOOTING.md`](./TROUBLESHOOTING.md) - Detailed troubleshooting
+   - [`WORKFLOW.md`](./application/WORKFLOW.md) - Complete workflow guide
+   - [`ARCHITECTURE.md`](./application/ARCHITECTURE.md) - System architecture
 
 2. **Try Advanced Features**
    - Upload larger files (> 5MB to see chunking)
@@ -515,7 +464,7 @@ Once everything is working:
 
 1. Check logs first (LocalStack, Elasticsearch, API)
 2. Verify all services are running
-3. Review the [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) guide
+3. Review the [WORKFLOW.md Troubleshooting](./application/WORKFLOW.md#troubleshooting) section
 4. Check environment variables in `.env` file
 5. Ensure all prerequisites are installed
 
@@ -528,4 +477,4 @@ Once everything is working:
 
 **Estimated Setup Time**: 5-10 minutes  
 **Difficulty**: Beginner-friendly  
-**Last Updated**: January 25, 2026
+**Last Updated**: February 18, 2026

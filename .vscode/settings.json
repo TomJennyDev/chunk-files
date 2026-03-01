@@ -1,0 +1,59 @@
+{
+  // MCP Server Configuration for VS Code
+  "mcp.servers": {
+    "chunk-files": {
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/mcp-server/dist/index.js"
+      ],
+      "env": {
+        "API_BASE_URL": "http://localhost:3000",
+        "NODE_ENV": "development"
+      }
+    }
+  },
+
+  // GitHub Copilot Settings with MCP
+  "github.copilot.enable": {
+    "*": true,
+    "yaml": true,
+    "plaintext": true,
+    "markdown": true
+  },
+  
+  // Enable MCP integration for Copilot Chat
+  "github.copilot.chat.mcp.enabled": true,
+  "github.copilot.chat.useSelectedModel": true,
+
+  // Workspace recommendations
+  "files.associations": {
+    "*.md": "markdown",
+    "*.json": "jsonc"
+  },
+
+  // TypeScript/JavaScript settings
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "javascript.preferences.importModuleSpecifier": "relative",
+
+  // Editor settings
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+
+  // Terminal settings
+  "terminal.integrated.env.windows": {
+    "API_BASE_URL": "http://localhost:3000"
+  },
+  "terminal.integrated.env.osx": {
+    "API_BASE_URL": "http://localhost:3000"
+  },
+  "terminal.integrated.env.linux": {
+    "API_BASE_URL": "http://localhost:3000"
+  },
+  "chatgpt.openOnStartup": true
+}

@@ -1,0 +1,114 @@
+#cloud-config
+# RKE2 Worker (Agent) Node
+# Terraform templatefile variables:
+#   hostname, ssh_public_key, rke2_token, rke2_version,
+#   first_master_ip, node_ip
+
+hostname: ${hostname}
+manage_etc_hosts: true
+fqdn: ${hostname}.local
+
+users:
+  - name: ubuntu
+    gecos: Ubuntu User
+    groups: [sudo, adm, docker]
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    lock_passwd: false
+%{ if ssh_public_key != "" ~}
+    ssh_authorized_keys:
+      - ${ssh_public_key}
+%{ endif ~}
+
+package_update: true
+package_upgrade: false
+packages:
+  - curl
+  - git
+  - htop
+  - jq
+  - open-iscsi
+  - nfs-common
+  - wireguard
+
+# Format và mount data disk cho K8s PVs / Longhorn
+disk_setup:
+  /dev/vdb:
+    table_type: gpt
+    layout: true
+    overwrite: false
+
+fs_setup:
+  - label: data
+    filesystem: ext4
+    device: /dev/vdb1
+    overwrite: false
+
+mounts:
+  - ["/dev/vdb1", "/data", "ext4", "defaults,nofail", "0", "2"]
+
+write_files:
+  # RKE2 agent configuration
+  - path: /etc/rancher/rke2/config.yaml
+    owner: root:root
+    permissions: "0600"
+    content: |
+      server: https://${first_master_ip}:9345
+      token: "${rke2_token}"
+      node-ip: "${node_ip}"
+      node-label:
+        - "topology.kubernetes.io/zone=harvester"
+        - "node-role=worker"
+
+  # Longhorn prerequisites
+  - path: /etc/modules-load.d/longhorn.conf
+    content: |
+      iscsi_tcp
+      dm_crypt
+
+runcmd:
+  # Data directories
+  - mkdir -p /data/longhorn
+
+  # Chờ master API server available (tối đa 10 phút)
+  - |
+    echo "Waiting for RKE2 API server at ${first_master_ip}:9345..."
+    timeout=600
+    elapsed=0
+    until curl -sk https://${first_master_ip}:9345/cacerts &>/dev/null; do
+      if [ $elapsed -ge $timeout ]; then
+        echo "TIMEOUT: Cannot reach RKE2 API server"
+        exit 1
+      fi
+      sleep 15
+      elapsed=$((elapsed + 15))
+      echo "Waiting for master... ($elapsed/$timeout)"
+    done
+    echo "Master is reachable, proceeding with agent install"
+
+  # Install RKE2 agent
+  - |
+    %{ if rke2_version != "" ~}
+    curl -sfL https://get.rke2.io | INSTALL_RKE2_TYPE=agent INSTALL_RKE2_VERSION="${rke2_version}" sh -
+    %{ else ~}
+    curl -sfL https://get.rke2.io | INSTALL_RKE2_TYPE=agent INSTALL_RKE2_CHANNEL=stable sh -
+    %{ endif ~}
+
+  # Enable ISCSI (cho Longhorn)
+  - systemctl enable iscsid && systemctl start iscsid
+
+  # Enable và start RKE2 agent
+  - systemctl enable rke2-agent.service
+  - systemctl start rke2-agent.service
+
+  # Symlink crictl
+  - ln -sf /var/lib/rancher/rke2/bin/crictl /usr/local/bin/crictl
+
+  # Environment variables
+  - |
+    cat >> /home/ubuntu/.bashrc <<'EOF'
+    export CRI_CONFIG_FILE=/var/lib/rancher/rke2/agent/etc/crictl.yaml
+    EOF
+
+final_message: |
+  RKE2 worker node '${hostname}' joined cluster at ${first_master_ip} after $UPTIME seconds.

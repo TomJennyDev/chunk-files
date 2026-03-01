@@ -1,16 +1,94 @@
-# LocalStack Lab - Persistent data directory
-data/
+# =============================================================
+# Turbo / Monorepo
+# =============================================================
+.turbo/
 
+# Sub-package lockfiles (monorepo uses root pnpm-lock.yaml)
+apps/*/pnpm-lock.yaml
+docs/pnpm-lock.yaml
+
+# =============================================================
+# Node.js / JavaScript / TypeScript
+# =============================================================
+node_modules/
+package-lock.json
+yarn.lock
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Test coverage & results
+coverage/
+.nyc_output/
+test-results/
+outputs.json
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# =============================================================
+# VitePress (docs)
+# =============================================================
+docs/.vitepress/dist/
+docs/.vitepress/cache/
+docs/.vitepress/.temp/
+
+# =============================================================
 # Terraform
+# =============================================================
 .terraform/
 .terraform.lock.hcl
-terraform.tfstate
-terraform.tfstate.backup
+*.tfstate
+*.tfstate.*
 *.tfplan
-*.tfvars
+tfplan
+terraform.tfvars
 !*.tfvars.example
+lambda-build/
+lambda-function.zip
+# Terraform test/debug output files
+search-result*.json
+search-test.json
+lambda-payload.json
+lambda-response.json
+response.json
 
+# =============================================================
+# Lambda artifacts
+# =============================================================
+*.zip
+
+# =============================================================
+# Docker / LocalStack persistent data (runtime generated)
+# =============================================================
+localstack-data/*
+!localstack-data/.gitkeep
+
+# =============================================================
+# File uploads (runtime data)
+# =============================================================
+apps/file-processor/uploads/*
+!apps/file-processor/uploads/.gitkeep
+
+# =============================================================
+# Environment variables
+# =============================================================
+.env
+.env.local
+.env.*.local
+# Keep examples committed:
+!*.env.example
+!.env.example
+
+# =============================================================
 # Python
+# =============================================================
 __pycache__/
 *.pyc
 *.pyo
@@ -19,47 +97,31 @@ venv/
 .venv/
 *.egg
 
-# Node.js
-node_modules/
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
-
-# VitePress
-.vitepress/dist/
-.vitepress/cache/
-.vitepress/.temp/
-
-# Lambda artifacts
-*.zip
-lambdas/*/dist/
-lambdas/*/build/
-
-# Test outputs
-outputs.json
-test-results/
-*.log
-
-# Backups
-*.tar.gz
-*.bak
-
-# IDE
-.vscode/
+# =============================================================
+# IDE & Editor
+# =============================================================
 .idea/
+.qodo/
 *.swp
 *.swo
 *~
 
+# =============================================================
 # OS
+# =============================================================
 .DS_Store
 Thumbs.db
 desktop.ini
 
-# Credentials (just in case)
+# =============================================================
+# Credentials & secrets
+# =============================================================
 *.pem
 *.key
 credentials.json
 
-# localstack
-localstack-data/*
+# =============================================================
+# Backups
+# =============================================================
+*.tar.gz
+*.bak

@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# Build
+dist/
+build/
+*.tsbuildinfo
+
+# Environment
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Uploads (runtime data)
+uploads/*
+!uploads/.gitkeep
+*.tmp
+
+# Logs
+logs/
+*.log
+
+# Test
+coverage/
+.nyc_output/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini

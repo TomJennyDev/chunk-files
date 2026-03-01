@@ -1,0 +1,32 @@
+{
+  "name": "chunk-files",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Chunk Files — AI-powered file processing & search monorepo",
+  "packageManager": "pnpm@9.15.4",
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "dev:web": "turbo run dev --filter=@chunk-files/web",
+    "dev:api": "turbo run dev --filter=@chunk-files/api",
+    "dev:docs": "turbo run dev --filter=@chunk-files/docs",
+    "dev:mcp": "turbo run dev --filter=@chunk-files/mcp-server",
+    "dev:test": "turbo run dev --filter=@chunk-files/api --filter=@chunk-files/web",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "docker:up": "docker compose up",
+    "docker:down": "docker compose down"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.0",
+    "prettier": "^3.6.2",
+    "rimraf": "^5.0.5"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

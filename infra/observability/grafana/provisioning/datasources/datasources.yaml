@@ -1,0 +1,66 @@
+# Grafana Data Sources - Auto-provisioned on startup
+
+apiVersion: 1
+
+datasources:
+  # Prometheus - Metrics
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: true
+    jsonData:
+      httpMethod: POST
+      exemplarTraceIdDestinations:
+        - name: traceID
+          datasourceUid: tempo
+      incrementalQuerying: true
+      incrementalQueryOverlapWindow: 10m
+
+  # Tempo - Traces
+  - name: Tempo
+    type: tempo
+    access: proxy
+    uid: tempo
+    url: http://tempo:3200
+    editable: true
+    jsonData:
+      httpMethod: GET
+      tracesToLogsV2:
+        datasourceUid: loki
+        spanStartTimeShift: "-1h"
+        spanEndTimeShift: "1h"
+        filterByTraceID: true
+        filterBySpanID: true
+        tags:
+          - key: service.name
+            value: job
+      tracesToMetrics:
+        datasourceUid: Prometheus
+        spanStartTimeShift: "-1h"
+        spanEndTimeShift: "1h"
+        tags:
+          - key: service.name
+            value: service_name
+      serviceMap:
+        datasourceUid: Prometheus
+      nodeGraph:
+        enabled: true
+      lokiSearch:
+        datasourceUid: loki
+
+  # Loki - Logs
+  - name: Loki
+    type: loki
+    access: proxy
+    uid: loki
+    url: http://loki:3100
+    editable: true
+    jsonData:
+      derivedFields:
+        - name: TraceID
+          datasourceUid: tempo
+          matcherRegex: '"traceid":"(\w+)"'
+          url: "$${__value.raw}"
+          matcherType: regex

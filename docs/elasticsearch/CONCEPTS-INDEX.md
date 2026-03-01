@@ -400,8 +400,8 @@ GET /_cat/indices?v
 
 ### Chủ đề khác:
 - **[../QUICKSTART.md](../QUICKSTART.md)** - Getting started guide
-- **[../WORKFLOW.md](../WORKFLOW.md)** - Development workflow
-- **[../KIBANA-GUIDE.md](../KIBANA-GUIDE.md)** - Kibana visualization
+- **[../WORKFLOW.md](../application/WORKFLOW.md)** - Development workflow
+- **[../KIBANA-GUIDE.md](../application/KIBANA-GUIDE.md)** - Kibana visualization
 
 ---
 

@@ -14,7 +14,7 @@ services:
       - PERSIST_FREQUENCY=10
     volumes:
       - "./localstack-data:/persisted-data"
-      - "./init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh"
+      - "./infra/init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh"
       - "/var/run/docker.sock:/var/run/docker.sock"  # Required for Lambda execution
     networks:
       - file-processor-network
@@ -92,9 +92,29 @@ services:
   #   deploy:
   #     replicas: 2  # Run 2 worker instances
 
-  # Elasticsearch - Search Engine (already running externally)
-  # Using external container: elasticsearch-local on port 9200
-  
+  # Elasticsearch - Search Engine
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: elasticsearch-local
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - cluster.name=file-processor-cluster
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    networks:
+      - file-processor-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
   # Kibana - Elasticsearch UI Dashboard
   kibana:
     image: docker.elastic.co/kibana/kibana:8.11.0
@@ -102,22 +122,145 @@ services:
     ports:
       - "5601:5601"
     environment:
-      - ELASTICSEARCH_HOSTS=http://host.docker.internal:9200
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
       - XPACK_SECURITY_ENABLED=false
       - XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=a7a6311933d3503b89bc2dbc36572c33a6c10925682e591bffcab6911c06786d
       - SERVER_NAME=kibana-local
       - SERVER_HOST=0.0.0.0
     networks:
       - file-processor-network
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:5601/api/status || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
 
+  # ============================================
+  # Observability Stack (Grafana + Tempo + Loki + Prometheus)
+  # ============================================
+
+  # OpenTelemetry Collector - Central telemetry pipeline
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.96.0
+    container_name: otel-collector
+    command: ["--config=/etc/otelcol/config.yaml"]
+    volumes:
+      - ./infra/observability/otel-collector/otel-collector-config.yaml:/etc/otelcol/config.yaml:ro
+    ports:
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+      - "8888:8888"   # Collector metrics
+    networks:
+      - file-processor-network
+    depends_on:
+      - tempo
+      - loki
+      - prometheus
+    restart: unless-stopped
+
+  # Grafana Tempo - Distributed Tracing
+  tempo:
+    image: grafana/tempo:2.4.1
+    container_name: tempo
+    command: ["-config.file=/etc/tempo/tempo-config.yaml"]
+    volumes:
+      - ./infra/observability/tempo/tempo-config.yaml:/etc/tempo/tempo-config.yaml:ro
+      - tempo-data:/tmp/tempo
+    ports:
+      - "3200:3200"   # Tempo API
+    networks:
+      - file-processor-network
+    restart: unless-stopped
+
+  # Grafana Loki - Log Aggregation
+  loki:
+    image: grafana/loki:2.9.4
+    container_name: loki
+    command: ["-config.file=/etc/loki/loki-config.yaml"]
+    volumes:
+      - ./infra/observability/loki/loki-config.yaml:/etc/loki/loki-config.yaml:ro
+      - loki-data:/loki
+    ports:
+      - "3100:3100"   # Loki API
+    networks:
+      - file-processor-network
+    restart: unless-stopped
+
+  # Prometheus - Metrics Collection
+  prometheus:
+    image: prom/prometheus:v2.50.1
+    container_name: prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=48h"
+      - "--web.enable-remote-write-receiver"
+      - "--enable-feature=exemplar-storage"
+      - "--enable-feature=native-histograms"
+    volumes:
+      - ./infra/observability/prometheus/prometheus.yaml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "9090:9090"   # Prometheus UI
+    networks:
+      - file-processor-network
+    restart: unless-stopped
+
+  # Grafana - Visualization & Dashboards
+  grafana:
+    image: grafana/grafana:10.4.1
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+      - GF_FEATURE_TOGGLES_ENABLE=traceqlEditor tempoSearch tempoServiceGraph tempoApmTable
+    volumes:
+      - ./infra/observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./infra/observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "3001:3000"   # Grafana UI (3001 to avoid conflict with NestJS)
+    networks:
+      - file-processor-network
+    depends_on:
+      - prometheus
+      - tempo
+      - loki
+    restart: unless-stopped
+
+  # Promtail - Docker container log collector → Loki
+  promtail:
+    image: grafana/promtail:3.3.2
+    container_name: promtail
+    command: ["-config.file=/etc/promtail/promtail-config.yaml"]
+    volumes:
+      - ./infra/observability/promtail/promtail-config.yaml:/etc/promtail/promtail-config.yaml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - file-processor-network
+    depends_on:
+      - loki
+    restart: unless-stopped
+
 networks:
   file-processor-network:
     name: file-processor-network
     driver: bridge
 
-volumes: {}
+volumes:
+  elasticsearch-data:
+    driver: local
+  tempo-data:
+    driver: local
+  loki-data:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local

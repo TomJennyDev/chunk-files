@@ -177,8 +177,8 @@ Intelligent markdown processing with AI support:
 - [💾 Caching Guide](../lamda/LAMBDA-CACHING-GUIDE.md)
 
 ### Advanced Topics
-- [📚 Chunking Strategies Detail](../CHUNKING-STRATEGIES-DETAIL.md)
-- [🔍 Search Implementation](../SEARCH-IMPLEMENTATION.md)
+- [📚 Chunking Strategies Detail](../elasticsearch/CHUNKING-STRATEGIES-DETAIL.md)
+- [🔍 Search Implementation](../elasticsearch/SEARCH-IMPLEMENTATION.md)
 - [🎯 Elasticsearch Optimization](../elasticsearch/OPTIMIZATION.md)
 
 ---

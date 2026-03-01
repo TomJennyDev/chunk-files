@@ -1,10 +1,16 @@
 {
+  "name": "@chunk-files/docs",
+  "version": "1.0.0",
+  "private": true,
   "devDependencies": {
-    "vitepress": "2.0.0-alpha.15"
+    "mermaid": "^11.12.3",
+    "vitepress": "2.0.0-alpha.15",
+    "vitepress-plugin-mermaid": "^2.0.17"
   },
   "scripts": {
     "dev": "vitepress dev",
     "build": "vitepress build",
-    "preview": "vitepress preview"
+    "preview": "vitepress preview",
+    "clean": "rimraf .vitepress/dist .vitepress/cache"
   }
 }

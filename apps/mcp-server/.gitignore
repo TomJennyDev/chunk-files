@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+# pnpm-lock.yaml managed at monorepo root
+pnpm-lock.yaml
+
+# Build output (compiled JS/TS under dist/)
+dist/
+*.tsbuildinfo
+
+# Environment
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Test coverage
+coverage/
+.nyc_output/

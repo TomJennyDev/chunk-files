@@ -1,0 +1,111 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build MCP Server",
+      "type": "npm",
+      "script": "build",
+      "path": "apps/mcp-server/",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": ["$tsc"],
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Watch MCP Server",
+      "type": "npm",
+      "script": "dev",
+      "path": "apps/mcp-server/",
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^(.+):(\\d+):(\\d+)\\s+-\\s+(error|warning)\\s+(.+)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "message": 5
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^.*building.*$",
+          "endsPattern": "^.*Ready to process requests.*$"
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Start Backend API",
+      "type": "npm",
+      "script": "start:dev",
+      "path": "apps/file-processor/",
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^(.+)$",
+          "message": 1
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^.*Starting.*$",
+          "endsPattern": "^.*Nest application successfully started.*$"
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Start LocalStack",
+      "type": "shell",
+      "command": "docker-compose up",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^(.+)$",
+          "message": 1
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^.*Starting.*$",
+          "endsPattern": "^.*Ready.*$"
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Start Full Stack",
+      "dependsOn": [
+        "Start LocalStack",
+        "Start Backend API",
+        "Watch MCP Server"
+      ],
+      "dependsOrder": "sequence",
+      "problemMatcher": []
+    },
+    {
+      "label": "Test MCP Connection",
+      "type": "shell",
+      "command": "echo '{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/list\"}' | node apps/mcp-server/dist/index.js",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    }
+  ]
+}

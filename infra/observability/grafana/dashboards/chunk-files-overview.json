@@ -1,0 +1,232 @@
+{
+  "annotations": { "list": [] },
+  "description": "Full observability dashboard for Chunk Files monorepo - Traces, Metrics, Logs",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "title": "Service Overview",
+      "type": "row",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "collapsed": false
+    },
+    {
+      "title": "Request Rate (req/s)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 1 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [
+        {
+          "expr": "sum(rate(traces_spanmetrics_calls_total[5m])) by (service)",
+          "legendFormat": "{{service}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 15, "pointSize": 5, "showPoints": "auto" }
+        },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max"] } }
+    },
+    {
+      "title": "Request Latency (p95 / p50)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 1 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [
+        { "expr": "histogram_quantile(0.95, sum(rate(traces_spanmetrics_latency_bucket[5m])) by (le, service))", "legendFormat": "p95 {{service}}", "refId": "A" },
+        { "expr": "histogram_quantile(0.50, sum(rate(traces_spanmetrics_latency_bucket[5m])) by (le, service))", "legendFormat": "p50 {{service}}", "refId": "B" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "ms", "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 10 } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["mean", "max"] } }
+    },
+    {
+      "title": "Error Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 1 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [
+        { "expr": "sum(rate(traces_spanmetrics_calls_total{status_code=\"STATUS_CODE_ERROR\"}[5m])) by (service)", "legendFormat": "errors {{service}}", "refId": "A" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "reqps", "custom": { "drawStyle": "bars", "fillOpacity": 50 }, "color": { "mode": "fixed", "fixedColor": "red" }, "noValue": "0" }, "overrides": [] }
+    },
+    {
+      "title": "Stats",
+      "type": "row",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 9 },
+      "collapsed": false
+    },
+    {
+      "title": "Total Requests (1h)",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 10 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [{ "expr": "sum(increase(traces_spanmetrics_calls_total{service=\"chunk-files-api\"}[1h]))", "refId": "A" }],
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 100 }] } } },
+      "options": { "colorMode": "background", "graphMode": "area", "textMode": "auto" }
+    },
+    {
+      "title": "Avg Latency (API)",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 10 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [{ "expr": "histogram_quantile(0.50, sum(rate(traces_spanmetrics_latency_bucket{service=\"chunk-files-api\"}[5m])) by (le))", "refId": "A" }],
+      "fieldConfig": { "defaults": { "unit": "ms", "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 100 }, { "color": "red", "value": 500 }] } } },
+      "options": { "colorMode": "background", "graphMode": "area" }
+    },
+    {
+      "title": "Error Count (1h)",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 10 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [{ "expr": "sum(increase(traces_spanmetrics_calls_total{status_code=\"STATUS_CODE_ERROR\"}[1h])) or vector(0)", "refId": "A" }],
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 1 }] } } },
+      "options": { "colorMode": "background", "graphMode": "none" }
+    },
+    {
+      "title": "Active Services",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 10 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [{ "expr": "count(count by (service)(traces_spanmetrics_calls_total))", "refId": "A" }],
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{ "color": "blue", "value": null }] } } },
+      "options": { "colorMode": "background", "graphMode": "none" }
+    },
+    {
+      "title": "API Endpoints",
+      "type": "row",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 14 },
+      "collapsed": false
+    },
+    {
+      "title": "Request Rate by Endpoint",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 15 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [{ "expr": "sum(rate(traces_spanmetrics_calls_total{service=\"chunk-files-api\"}[5m])) by (span_name)", "legendFormat": "{{span_name}}", "refId": "A" }],
+      "fieldConfig": { "defaults": { "unit": "reqps", "custom": { "drawStyle": "bars", "fillOpacity": 50, "stacking": { "mode": "normal" } } } }
+    },
+    {
+      "title": "Latency by Endpoint (p95)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 15 },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(traces_spanmetrics_latency_bucket{service=\"chunk-files-api\"}[5m])) by (le, span_name))", "legendFormat": "{{span_name}}", "refId": "A" }],
+      "fieldConfig": { "defaults": { "unit": "ms", "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 10 } } }
+    },
+    {
+      "title": "Traces",
+      "type": "row",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 23 },
+      "collapsed": false
+    },
+    {
+      "title": "Recent Traces",
+      "type": "traces",
+      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 24 },
+      "datasource": { "type": "tempo", "uid": "tempo" },
+      "targets": [{ "queryType": "traceqlSearch", "limit": 20, "filters": [{ "id": "service-name", "tag": "service.name", "operator": "=", "scope": "resource" }], "refId": "A" }]
+    },
+    {
+      "title": "Logs",
+      "type": "row",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 36 },
+      "collapsed": false
+    },
+    {
+      "title": "Application Logs",
+      "type": "logs",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 37 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [{ "expr": "{job=\"chunk-files-api\"}", "refId": "A" }],
+      "options": { "showTime": true, "showLabels": true, "showCommonLabels": false, "wrapLogMessage": true, "prettifyLogMessage": false, "enableLogDetails": true, "sortOrder": "Descending" }
+    },
+    {
+      "title": "Service Map",
+      "type": "row",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 47 },
+      "collapsed": false
+    },
+    {
+      "title": "Service Dependency Graph",
+      "type": "nodeGraph",
+      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 48 },
+      "datasource": { "type": "tempo", "uid": "tempo" },
+      "targets": [{ "queryType": "serviceMap", "refId": "A" }]
+    },
+    {
+      "title": "LocalStack / AWS Flow",
+      "type": "row",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 60 },
+      "collapsed": false
+    },
+    {
+      "title": "LocalStack Container Logs",
+      "description": "Live logs from the LocalStack container — shows S3, SQS, Lambda, OpenSearch operations",
+      "type": "logs",
+      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 61 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [{ "expr": "{container=\"file-processor-localstack\"}", "refId": "A" }],
+      "options": { "showTime": true, "showLabels": true, "showCommonLabels": false, "wrapLogMessage": true, "prettifyLogMessage": false, "enableLogDetails": true, "sortOrder": "Descending" }
+    },
+    {
+      "title": "LocalStack Logs by AWS Service",
+      "description": "Filter LocalStack logs by specific AWS service (s3, sqs, lambda, etc.)",
+      "type": "logs",
+      "gridPos": { "h": 10, "w": 12, "x": 0, "y": 73 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [{ "expr": "{container=\"file-processor-localstack\"} |~ \"(?i)(s3|sqs|lambda|opensearch)\" | line_format \"{{.aws_service}} {{__line__}}\"", "refId": "A" }],
+      "options": { "showTime": true, "showLabels": true, "showCommonLabels": false, "wrapLogMessage": true, "enableLogDetails": true, "sortOrder": "Descending" }
+    },
+    {
+      "title": "LocalStack Error Logs",
+      "description": "Errors and warnings from LocalStack",
+      "type": "logs",
+      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 73 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "targets": [{ "expr": "{container=\"file-processor-localstack\"} |~ \"(?i)(error|exception|traceback|fail)\"", "refId": "A" }],
+      "options": { "showTime": true, "showLabels": true, "showCommonLabels": false, "wrapLogMessage": true, "enableLogDetails": true, "sortOrder": "Descending" }
+    },
+    {
+      "title": "AWS SDK Calls (Traced)",
+      "description": "Traces of AWS SDK calls from NestJS → LocalStack (S3, SQS, Lambda)",
+      "type": "traces",
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 83 },
+      "datasource": { "type": "tempo", "uid": "tempo" },
+      "targets": [{ "queryType": "traceqlSearch", "limit": 20, "filters": [{ "id": "span-name", "tag": "rpc.service", "operator": "=~", "value": ["S3", "SQS", "Lambda", "DynamoDB"], "valueType": "string", "scope": "span" }], "refId": "A" }]
+    },
+    {
+      "title": "All Container Logs",
+      "type": "row",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 93 },
+      "collapsed": true,
+      "panels": [
+        {
+          "title": "All Docker Container Logs",
+          "description": "Logs from all containers: LocalStack, Elasticsearch, Kibana, OTel Collector, etc.",
+          "type": "logs",
+          "gridPos": { "h": 12, "w": 24, "x": 0, "y": 94 },
+          "datasource": { "type": "loki", "uid": "loki" },
+          "targets": [{ "expr": "{container=~\".+\"}", "refId": "A" }],
+          "options": { "showTime": true, "showLabels": true, "showCommonLabels": false, "wrapLogMessage": true, "enableLogDetails": true, "sortOrder": "Descending" }
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["chunk-files", "observability", "otel"],
+  "templating": { "list": [] },
+  "time": { "from": "now-15m", "to": "now" },
+  "timepicker": { "refresh_intervals": ["5s", "10s", "30s", "1m", "5m"] },
+  "timezone": "browser",
+  "title": "Chunk Files - Full Stack Observability",
+  "uid": "chunk-files-observability",
+  "version": 2,
+  "refresh": "10s"
+}

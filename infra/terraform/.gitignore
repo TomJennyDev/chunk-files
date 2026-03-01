@@ -1,0 +1,35 @@
+# Terraform state (never commit state files)
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+
+# Terraform working directory
+.terraform/
+.terraform.lock.hcl
+
+# Terraform plan files
+*.tfplan
+tfplan
+
+# Terraform variable files with real values
+terraform.tfvars
+!terraform.tfvars.example
+
+# Lambda build artifacts
+lambda-build/
+lambda-function.zip
+*.zip
+
+# Test/debug output files
+search-result*.json
+search-test.json
+lambda-payload.json
+lambda-response.json
+response.json
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+package-lock.json

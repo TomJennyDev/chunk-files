@@ -1,0 +1,64 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug MCP Server",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/mcp-server/src/index.ts",
+      "preLaunchTask": "npm: build - mcp-server",
+      "outFiles": [
+        "${workspaceFolder}/mcp-server/dist/**/*.js"
+      ],
+      "cwd": "${workspaceFolder}/mcp-server",
+      "env": {
+        "API_BASE_URL": "http://localhost:3000",
+        "NODE_ENV": "development"
+      },
+      "console": "integratedTerminal",
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    },
+    {
+      "name": "Debug NestJS API",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "start:debug"
+      ],
+      "cwd": "${workspaceFolder}/file-processor",
+      "console": "integratedTerminal",
+      "restart": true,
+      "protocol": "inspector",
+      "env": {
+        "NODE_ENV": "development"
+      }
+    },
+    {
+      "name": "Test MCP Tools",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/mcp-server/dist/index.js",
+      "args": [],
+      "cwd": "${workspaceFolder}/mcp-server",
+      "env": {
+        "API_BASE_URL": "http://localhost:3000",
+        "LOG_LEVEL": "debug"
+      },
+      "console": "integratedTerminal"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Full Stack Debug",
+      "configurations": [
+        "Debug NestJS API",
+        "Debug MCP Server"
+      ],
+      "stopAll": true
+    }
+  ]
+}

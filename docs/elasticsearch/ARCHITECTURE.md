@@ -811,8 +811,8 @@ GET /_nodes/stats/breaker
 ## 📚 Next Steps
 
 - ✅ Completed **ARCHITECTURE.md** ← You are here
-- ➡️ Next: [QUERIES.md](./QUERIES.md) - Query DSL and search
-- 📖 Or: [INDEXING.md](./INDEXING.md) - Index management
+- ➡️ Next: [SEARCH-IMPLEMENTATION.md](./SEARCH-IMPLEMENTATION.md) - Query DSL and search
+- 📖 Or: [INDICES.md](./INDICES.md) - Index management
 
 ---
 

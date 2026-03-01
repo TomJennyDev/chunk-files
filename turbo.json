@@ -1,0 +1,37 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".next/**", ".vitepress/dist/**"],
+      "inputs": [
+        "src/**",
+        "tsconfig.json",
+        "tsconfig.build.json",
+        "package.json",
+        "nest-cli.json",
+        "vite.config.*",
+        "postcss.config.*"
+      ]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "lint": {
+      "dependsOn": ["^build"],
+      "cache": true
+    },
+    "typecheck": {
+      "dependsOn": ["^build"],
+      "cache": true
+    },
+    "test": {
+      "dependsOn": ["build"],
+      "cache": true
+    },
+    "clean": {
+      "cache": false
+    }
+  }
+}

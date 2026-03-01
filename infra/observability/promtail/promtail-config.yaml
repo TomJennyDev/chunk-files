@@ -1,0 +1,57 @@
+# Promtail Configuration
+# Scrapes Docker container logs and ships to Loki
+# Automatically labels logs by container name, service, compose project
+
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+    batchwait: 1s
+    batchsize: 1048576
+
+scrape_configs:
+  # Scrape all Docker container logs
+  - job_name: docker
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+        filters:
+          - name: status
+            values: ["running"]
+
+    relabel_configs:
+      # Use container name as label
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(.*)'
+        target_label: container
+      
+      # Use compose service name
+      - source_labels: ['__meta_docker_container_label_com_docker_compose_service']
+        target_label: service
+      
+      # Use compose project name
+      - source_labels: ['__meta_docker_container_label_com_docker_compose_project']
+        target_label: project
+
+      # Tag the log stream with container ID
+      - source_labels: ['__meta_docker_container_id']
+        target_label: container_id
+
+    pipeline_stages:
+      # Try to detect log level from LocalStack output
+      - regex:
+          expression: '(?i)(?P<level>DEBUG|INFO|WARN|WARNING|ERROR|CRITICAL)'
+      - labels:
+          level:
+      
+      # Extract AWS service name from LocalStack logs
+      # e.g., "2024-01-15T10:00:00 INFO --- [s3] ..."
+      - regex:
+          expression: '\[(?P<aws_service>s3|sqs|lambda|dynamodb|opensearch|kms|iam|logs|sts)\]'
+      - labels:
+          aws_service:

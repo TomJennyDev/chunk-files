@@ -787,10 +787,10 @@ Cons: Complex ILM management
 - YouTube channels: Elastic, FreeCodeCamp
 
 ### Related Guides in This Project
-- [Main README](../../README.md) - Project overview
-- [Architecture](../ARCHITECTURE.md) - System architecture
-- [Kibana Guide](../KIBANA-GUIDE.md) - Kibana basics
-- [Workflow](../WORKFLOW.md) - Integration workflow
+- [Main README](../README.md) - Project overview
+- [Architecture](../application/ARCHITECTURE.md) - System architecture
+- [Kibana Guide](../application/KIBANA-GUIDE.md) - Kibana basics
+- [Workflow](../application/WORKFLOW.md) - Integration workflow
 
 ---
 
@@ -939,4 +939,4 @@ This documentation is maintained as part of the LocalStack lab environment. To c
 
 **Happy Searching!** 🎉
 
-*For questions or feedback, refer to the main project [README](../../README.md)*
+*For questions or feedback, refer to the main project [README](../README.md)*

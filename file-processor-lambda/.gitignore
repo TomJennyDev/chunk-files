@@ -1,8 +1,0 @@
-node_modules/
-dist/
-*.zip
-*.log
-.DS_Store
-.env
-.env.local
-response.json

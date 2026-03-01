@@ -1,0 +1,72 @@
+#cloud-config
+# Cloud-init template cho K3s node trên Proxmox
+# Được upload lên Proxmox snippets storage rồi gán vào VM
+
+hostname: ${hostname}
+manage_etc_hosts: true
+fqdn: ${hostname}.local
+
+users:
+  - name: ubuntu
+    gecos: Ubuntu User
+    groups: [sudo, docker]
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    lock_passwd: false
+    %{ if ssh_public_key != "" }
+    ssh_authorized_keys:
+      - ${ssh_public_key}
+    %{ endif }
+
+package_update: true
+package_upgrade: false
+packages:
+  - curl
+  - git
+  - htop
+  - open-iscsi        # cho Longhorn storage
+  - nfs-common        # cho NFS PVs
+  - qemu-guest-agent  # cần thiết cho Proxmox agent
+
+# Enable & khởi động QEMU guest agent ngay khi boot
+runcmd:
+  # Khởi động QEMU guest agent
+  - systemctl enable qemu-guest-agent
+  - systemctl start qemu-guest-agent
+
+  # Format và mount data disk (virtio1 → /dev/vdb)
+  - |
+    if [ -b /dev/vdb ] && ! blkid /dev/vdb; then
+      mkfs.ext4 /dev/vdb
+      mkdir -p /data
+      echo "/dev/vdb /data ext4 defaults,nofail 0 2" >> /etc/fstab
+      mount -a
+    fi
+
+  # Tạo thư mục data
+  - mkdir -p /data/k3s-storage
+
+  # Cài K3s (K8s single-node hoặc master node)
+  - |
+    curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="\
+      server \
+      --disable traefik \
+      --disable servicelb \
+      --data-dir /data/k3s \
+      --default-local-storage-path /data/k3s-storage \
+      --write-kubeconfig-mode 644" \
+    sh -
+
+  # Copy kubeconfig về home ubuntu
+  - mkdir -p /home/ubuntu/.kube
+  - cp /etc/rancher/k3s/k3s.yaml /home/ubuntu/.kube/config
+  - sed -i "s/127.0.0.1/$(hostname -I | awk '{print $1}')/g" /home/ubuntu/.kube/config
+  - chown -R ubuntu:ubuntu /home/ubuntu/.kube
+
+  # Đặt kubectl alias
+  - echo 'export KUBECONFIG=/home/ubuntu/.kube/config' >> /home/ubuntu/.bashrc
+  - echo 'alias k=kubectl' >> /home/ubuntu/.bashrc
+
+final_message: |
+  K3s node '${hostname}' đã sẵn sàng sau $UPTIME giây.
+  Kubeconfig: /home/ubuntu/.kube/config

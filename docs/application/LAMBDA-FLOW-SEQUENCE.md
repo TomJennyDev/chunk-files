@@ -53,7 +53,7 @@ sequenceDiagram
     participant User as 👤 User
     participant API as 🌐 NestJS API
     participant S3 as 📦 S3 Storage
-    participant DDB as 🗄️ DynamoDB
+    participant Repo as 🗄️ InMemoryRepo
     participant SQS as 📨 SQS Queue
     
     User->>API: POST /files/upload<br/>(file: document.md)
@@ -61,26 +61,26 @@ sequenceDiagram
     
     Note over API: Generate fileId<br/>UUID v4
     
-    API->>API: Validate file<br/>- Type: .md<br/>- Size: < 100MB
+    API->>API: Validate file<br/>- Size: < 500MB
     
-    API->>S3: PutObject<br/>Key: files/{fileId}.md
+    API->>S3: PutObject<br/>Key: uploads/{fileId}/{fileName}
     activate S3
     S3-->>API: ✓ Success<br/>ETag, Location
     deactivate S3
     
-    API->>DDB: PutItem<br/>fileId, metadata
-    activate DDB
-    Note over DDB: Store:<br/>- fileId<br/>- fileName<br/>- fileSize<br/>- status: PENDING
-    DDB-->>API: ✓ Success
-    deactivate DDB
+    API->>Repo: save(file)
+    activate Repo
+    Note over Repo: Store in-memory:<br/>- fileId<br/>- fileName<br/>- fileSize<br/>- status: uploaded
+    Repo-->>API: ✓ Success
+    deactivate Repo
     
     API->>SQS: SendMessage
     activate SQS
-    Note over SQS: Message Body:<br/>{<br/>  fileId,<br/>  s3Key,<br/>  fileName,<br/>  fileSize,<br/>  contentType<br/>}
+    Note over SQS: Message Body:<br/>{<br/>  fileId,<br/>  s3Key,<br/>  fileName,<br/>  fileSize,<br/>  mimeType<br/>}
     SQS-->>API: ✓ MessageId
     deactivate SQS
     
-    API-->>User: 201 Created<br/>{fileId, status: "PENDING"}
+    API-->>User: 201 Created<br/>{fileId, status: "uploaded"}
     deactivate API
     
     Note over User,SQS: File uploaded successfully<br/>Waiting for processing...
@@ -107,15 +107,11 @@ const response = await fetch('/files/upload', {
 // file.controller.ts
 @Post('upload')
 async uploadFile(@UploadedFile() file: Express.Multer.File) {
-  // Validate file type
-  if (!file.originalname.match(/\.(md|markdown)$/)) {
-    throw new BadRequestException('Only markdown files allowed');
-  }
+  // File type validation is handled by Multer config
+  // All file types are accepted
   
-  // Validate size (100MB limit)
-  if (file.size > 100 * 1024 * 1024) {
-    throw new BadRequestException('File too large');
-  }
+  // Validate size (500MB limit - configured in Multer)
+  // MAX_FILE_SIZE=524288000
   
   const fileId = uuid();
   // ... continue
@@ -127,24 +123,22 @@ async uploadFile(@UploadedFile() file: Express.Multer.File) {
 // s3.adapter.ts
 await this.s3Client.putObject({
   Bucket: 'file-uploads',
-  Key: `files/${fileId}.md`,
+  Key: `uploads/${fileId}/${file.originalname}`,
   Body: file.buffer,
-  ContentType: 'text/markdown'
+  ContentType: file.mimetype
 });
 ```
 
-#### Step 6-7: Store Metadata in DynamoDB
+#### Step 6-7: Store Metadata In-Memory
 ```typescript
-// file-repository.ts
-await this.dynamodb.putItem({
-  TableName: 'file-uploads',
-  Item: {
-    fileId: { S: fileId },
-    fileName: { S: file.originalname },
-    fileSize: { N: file.size.toString() },
-    status: { S: 'PENDING' },
-    uploadedAt: { S: new Date().toISOString() }
-  }
+// in-memory-file.repository.ts
+// Uses InMemoryFileRepository (NOT DynamoDB)
+this.files.set(fileId, {
+  fileId,
+  fileName: file.originalname,
+  fileSize: file.size,
+  status: 'uploaded',
+  uploadedAt: new Date().toISOString()
 });
 ```
 
@@ -155,10 +149,10 @@ await this.sqsClient.sendMessage({
   QueueUrl: this.queueUrl,
   MessageBody: JSON.stringify({
     fileId,
-    s3Key: `files/${fileId}.md`,
+    s3Key: `uploads/${fileId}/${file.originalname}`,
     fileName: file.originalname,
     fileSize: file.size,
-    contentType: 'text/markdown'
+    mimeType: file.mimetype
   })
 });
 ```
@@ -166,7 +160,7 @@ await this.sqsClient.sendMessage({
 **⏱️ Timing:**
 - API validation: ~10ms
 - S3 upload: ~100-500ms (depends on file size)
-- DynamoDB write: ~20ms
+- In-memory save: ~1ms
 - SQS send: ~30ms
 - **Total: ~160-560ms**
 
@@ -215,7 +209,7 @@ sequenceDiagram
         Lambda->>Cache: Check file cache<br/>getCachedFile(s3Key)
         Cache-->>Lambda: ❌ Cache MISS
         
-        Lambda->>S3: GetObject<br/>Key: files/{fileId}.md
+        Lambda->>S3: GetObject<br/>Key: uploads/{fileId}/{fileName}
         activate S3
         S3-->>Lambda: ✓ File content<br/>Size: 50KB
         deactivate S3
@@ -1392,7 +1386,7 @@ sequenceDiagram
     Lambda->>Lambda: Error recovery
     
     alt Out of Memory
-        Note over Lambda: Memory: 512MB too small
+        Note over Lambda: Memory: 1024MB
         Lambda->>Lambda: Disable embeddings<br/>for this run
         Lambda->>Lambda: Continue without vectors
         Lambda->>ES: Index without embeddings
@@ -1420,7 +1414,7 @@ sequenceDiagram
   "message": "Failed to download file from S3",
   "details": {
     "bucket": "file-uploads",
-    "key": "files/abc-123.md",
+    "key": "uploads/abc-123/document.md",
     "errorCode": "NoSuchKey",
     "retryable": false
   },
@@ -1451,7 +1445,7 @@ sequenceDiagram
   "message": "Failed to generate embeddings",
   "details": {
     "errorType": "OutOfMemoryError",
-    "lambdaMemory": "512MB",
+    "lambdaMemory": "1024MB",
     "recommendedMemory": "1024MB",
     "fallbackMode": "text-only",
     "semanticSearchDisabled": true
@@ -1486,7 +1480,7 @@ sequenceDiagram
 #### Without Embeddings
 ```
 Configuration:
-- Memory: 512MB
+- Memory: 1024MB
 - Avg duration: 2s per file
 - Monthly files: 10,000
 

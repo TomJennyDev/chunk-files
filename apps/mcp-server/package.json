@@ -1,0 +1,43 @@
+{
+  "name": "@chunk-files/mcp-server",
+  "version": "1.0.0",
+  "description": "MCP Server for Chunk Files Application - AI-powered file processing and search",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "clean": "rimraf dist",
+    "typecheck": "tsc --noEmit",
+    "lint": "echo \"No linter configured\"",
+    "rebuild": "npm run clean && npm run build",
+    "inspect": "node --inspect dist/index.js"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "file-processing",
+    "search",
+    "ai"
+  ],
+  "author": "TomJennyDev",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.5.0",
+    "axios": "^1.6.7",
+    "dotenv": "^16.4.5",
+    "form-data": "^4.0.5"
+  },
+  "devDependencies": {
+    "@types/form-data": "^2.5.2",
+    "@types/node": "^20.11.16",
+    "rimraf": "^5.0.5",
+    "tsx": "^4.7.1",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

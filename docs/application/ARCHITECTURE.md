@@ -76,7 +76,7 @@
          │  Lambda Worker │
          │ file-processor │
          │  Node.js 20.x  │
-         │   512MB / 300s │
+         │  1024MB / 300s │
          └───────┬────────┘
                  │
     ┌────────────┼────────────┐
@@ -234,11 +234,11 @@
 │  │  │  }                                              │ │ │
 │  │  │                                                 │ │ │
 │  │  │  Algorithm:                                     │ │ │
-│  │  │  • CHUNK_SIZE = 5MB                             │ │ │
-│  │  │  • CHUNK_OVERLAP = 100 bytes                    │ │ │
-│  │  │  • Loop: startByte to endByte                   │ │ │
-│  │  │  • Create chunk object with metadata            │ │ │
-│  │  │  • Move pointer: endByte - CHUNK_OVERLAP        │ │ │
+│  │  │  • Markdown: CHUNK_SIZE = 1000 chars            │ │ │
+│  │  │  • Markdown: CHUNK_OVERLAP = 200 chars          │ │ │
+│  │  │  • Binary: BYTE_CHUNK_SIZE = 5MB                │ │ │
+│  │  │  • Binary: BYTE_CHUNK_OVERLAP = 100 bytes       │ │ │
+│  │  │  • AI Embeddings: all-MiniLM-L6-v2 (384 dims)  │ │ │
 │  │  └────────────────────────────────────────────────┘ │ │
 │  │                   │                                  │ │
 │  │  Step 3: Index to Elasticsearch                     │ │
@@ -277,7 +277,7 @@
 //    - /tmp file cache
 //    - Connection pooling
 
-// 3. handler-markdown.js - AI-powered (NEW)
+// 3. handler-markdown.js - AI-powered (ACTIVE DEFAULT)
 //    - Markdown structure parsing
 //    - Semantic chunking (LangChain)
 //    - AI embeddings (all-MiniLM-L6-v2)
@@ -537,8 +537,9 @@ Message Retention: 4 days
        │                        │                        │
        │          ┌─────────────▼──────────────┐         │
        │          │ 3. Chunk File              │         │
-       │          │    - 5MB chunks            │         │
-       │          │    - 100 bytes overlap     │         │
+       │          │    - MD: 1000 chars         │         │
+       │          │    - Binary: 5MB chunks     │         │
+       │          │    - AI embeddings          │         │
        │          │    - Generate metadata     │         │
        │          └─────────────┬──────────────┘         │
        │                        │                        │
@@ -802,6 +803,6 @@ Message Retention: 4 days
 
 ---
 
-**Last Updated**: January 25, 2026  
-**Version**: 1.0  
+**Last Updated**: February 18, 2026  
+**Version**: 2.0  
 **Status**: ✅ Complete

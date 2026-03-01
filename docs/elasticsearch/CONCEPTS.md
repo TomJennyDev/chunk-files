@@ -9,7 +9,7 @@
 ### Khái Niệm Cơ Bản
 1. [Documents](#1-documents) → [📄 Chi tiết](./DOCUMENTS.md)
 2. [Indices](#2-indices) → [📚 Chi tiết](./INDICES.md)
-3. [Inverted Index](#3-inverted-index) → [🔍 Chi tiết](./INVERTED-INDEX.md)
+3. [Inverted Index](#3-inverted-index)
 
 ### Phân Phối & Mở Rộng
 4. [Shards](#4-shards) → [🧩 Chi tiết](./SHARDS.md)
@@ -1807,7 +1807,7 @@ Cluster
 
 - ✅ Completed **CONCEPTS.md** ← You are here
 - ➡️ Next: [ARCHITECTURE.md](./ARCHITECTURE.md) - Cluster architecture
-- 📖 Then: [QUERIES.md](./QUERIES.md) - Search and query DSL
+- 📖 Then: [SEARCH-IMPLEMENTATION.md](./SEARCH-IMPLEMENTATION.md) - Search and query DSL
 
 ---
 
