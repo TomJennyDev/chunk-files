@@ -110,6 +110,23 @@ export default withMermaid({
           { text: "Infrastructure", link: "/modules/INFRASTRUCTURE" },
         ],
       },
+      {
+        text: "Diagrams",
+        items: [
+          { text: "Overview", link: "/diagrams/README" },
+          { text: "Solution Architecture", link: "/diagrams/01-solution-architecture-overview" },
+          { text: "C4 Model", link: "/diagrams/02-c4-model" },
+          { text: "Data Flow Pipeline", link: "/diagrams/03-data-flow-pipeline" },
+          { text: "Infrastructure", link: "/diagrams/04-infrastructure-architecture" },
+          { text: "Observability", link: "/diagrams/05-observability-architecture" },
+          { text: "CI/CD Pipeline", link: "/diagrams/06-cicd-pipeline" },
+          { text: "Domain Model", link: "/diagrams/07-domain-model-patterns" },
+          { text: "Sequence Diagrams", link: "/diagrams/08-sequence-diagrams" },
+          { text: "Network & Security", link: "/diagrams/09-network-security-architecture" },
+          { text: "Scalability & HA", link: "/diagrams/10-scalability-ha-architecture" },
+          { text: "Developer Experience", link: "/diagrams/11-developer-experience" },
+        ],
+      },
     ],
 
     sidebar: {
@@ -207,6 +224,48 @@ export default withMermaid({
             { text: "MCP Server", link: "/modules/MCP-SERVER" },
             { text: "Infrastructure", link: "/modules/INFRASTRUCTURE" },
           ],
+        },
+        {
+          text: "📐 Architecture Diagrams",
+          collapsed: false,
+          items: [
+            { text: "Diagram Catalog", link: "/diagrams/README" },
+            { text: "Solution Architecture", link: "/diagrams/01-solution-architecture-overview" },
+            { text: "C4 Model", link: "/diagrams/02-c4-model" },
+            { text: "Data Flow Pipeline", link: "/diagrams/03-data-flow-pipeline" },
+            { text: "Infrastructure", link: "/diagrams/04-infrastructure-architecture" },
+            { text: "Observability", link: "/diagrams/05-observability-architecture" },
+            { text: "CI/CD Pipeline", link: "/diagrams/06-cicd-pipeline" },
+          ],
+        },
+      ],
+      "/diagrams/": [
+        {
+          text: "📐 Architecture Diagrams",
+          items: [
+            { text: "Diagram Catalog", link: "/diagrams/README" },
+            { text: "Solution Architecture", link: "/diagrams/01-solution-architecture-overview" },
+            { text: "C4 Model", link: "/diagrams/02-c4-model" },
+            { text: "Data Flow Pipeline", link: "/diagrams/03-data-flow-pipeline" },
+            { text: "Infrastructure", link: "/diagrams/04-infrastructure-architecture" },
+            { text: "Observability", link: "/diagrams/05-observability-architecture" },
+            { text: "CI/CD Pipeline", link: "/diagrams/06-cicd-pipeline" },
+          ],
+        },
+        {
+          text: "🏗️ Design & Operations",
+          collapsed: false,
+          items: [
+            { text: "Domain Model & Patterns", link: "/diagrams/07-domain-model-patterns" },
+            { text: "Sequence Diagrams", link: "/diagrams/08-sequence-diagrams" },
+            { text: "Network & Security", link: "/diagrams/09-network-security-architecture" },
+            { text: "Scalability & HA", link: "/diagrams/10-scalability-ha-architecture" },
+            { text: "Developer Experience", link: "/diagrams/11-developer-experience" },
+          ],
+        },
+        {
+          text: "🔙 Back to Main Docs",
+          items: [{ text: "← Documentation Index", link: "/README" }],
         },
       ],
       "/application/": [
