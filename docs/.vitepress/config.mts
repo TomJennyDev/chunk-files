@@ -105,6 +105,7 @@ export default withMermaid({
         items: [
           { text: "Overview", link: "/modules/README" },
           { text: "API Service", link: "/modules/API" },
+          { text: "API Reference", link: "/modules/API-REFERENCE" },
           { text: "Web Frontend", link: "/modules/WEB" },
           { text: "MCP Server", link: "/modules/MCP-SERVER" },
           { text: "Infrastructure", link: "/modules/INFRASTRUCTURE" },
@@ -114,17 +115,135 @@ export default withMermaid({
         text: "Diagrams",
         items: [
           { text: "Overview", link: "/diagrams/README" },
-          { text: "Solution Architecture", link: "/diagrams/01-solution-architecture-overview" },
+          {
+            text: "Solution Architecture",
+            link: "/diagrams/01-solution-architecture-overview",
+          },
           { text: "C4 Model", link: "/diagrams/02-c4-model" },
-          { text: "Data Flow Pipeline", link: "/diagrams/03-data-flow-pipeline" },
-          { text: "Infrastructure", link: "/diagrams/04-infrastructure-architecture" },
-          { text: "Observability", link: "/diagrams/05-observability-architecture" },
+          {
+            text: "Data Flow Pipeline",
+            link: "/diagrams/03-data-flow-pipeline",
+          },
+          {
+            text: "Infrastructure",
+            link: "/diagrams/04-infrastructure-architecture",
+          },
+          {
+            text: "Observability",
+            link: "/diagrams/05-observability-architecture",
+          },
           { text: "CI/CD Pipeline", link: "/diagrams/06-cicd-pipeline" },
           { text: "Domain Model", link: "/diagrams/07-domain-model-patterns" },
           { text: "Sequence Diagrams", link: "/diagrams/08-sequence-diagrams" },
-          { text: "Network & Security", link: "/diagrams/09-network-security-architecture" },
-          { text: "Scalability & HA", link: "/diagrams/10-scalability-ha-architecture" },
-          { text: "Developer Experience", link: "/diagrams/11-developer-experience" },
+          {
+            text: "Network & Security",
+            link: "/diagrams/09-network-security-architecture",
+          },
+          {
+            text: "Scalability & HA",
+            link: "/diagrams/10-scalability-ha-architecture",
+          },
+          {
+            text: "Developer Experience",
+            link: "/diagrams/11-developer-experience",
+          },
+        ],
+      },
+      {
+        text: "🐳 Docker",
+        items: [
+          { text: "Learning Roadmap", link: "/docker/README" },
+          {
+            text: "Container Fundamentals",
+            link: "/docker/CONTAINER-FUNDAMENTALS",
+          },
+          {
+            text: "Dockerfile Best Practices",
+            link: "/docker/DOCKERFILE-BEST-PRACTICES",
+          },
+          { text: "Image Architecture", link: "/docker/IMAGE-ARCHITECTURE" },
+          {
+            text: "Networking Deep Dive",
+            link: "/docker/NETWORKING-DEEP-DIVE",
+          },
+          { text: "Storage & Volumes", link: "/docker/STORAGE-AND-VOLUMES" },
+          { text: "Security Hardening", link: "/docker/SECURITY-HARDENING" },
+          {
+            text: "Compose Fundamentals",
+            link: "/docker/COMPOSE-FUNDAMENTALS",
+          },
+          {
+            text: "Compose Advanced",
+            link: "/docker/COMPOSE-ADVANCED-PATTERNS",
+          },
+          { text: "Troubleshooting", link: "/docker/TROUBLESHOOTING" },
+        ],
+      },
+      {
+        text: "🎓 Senior Architect",
+        items: [
+          { text: "Roadmap & Overview", link: "/senior-architect/README" },
+          {
+            text: "System Design Fundamentals",
+            link: "/senior-architect/SYSTEM-DESIGN-BASICS",
+          },
+          {
+            text: "Scale From 0 to Millions",
+            link: "/senior-architect/SCALE-FROM-ZERO-TO-MILLIONS",
+          },
+          {
+            text: "Architecture: Micro vs Monolith",
+            link: "/senior-architect/MICROSERVICES-VS-MONOLITH",
+          },
+          {
+            text: "Communication: Event-Driven",
+            link: "/senior-architect/EVENT-DRIVEN-ARCHITECTURE",
+          },
+          {
+            text: "Governance: Distributed Data",
+            link: "/senior-architect/DISTRIBUTED-TRANSACTIONS-SAGA",
+          },
+          {
+            text: "Governance: Scaling Database",
+            link: "/senior-architect/DATABASE-SCALING",
+          },
+          {
+            text: "Reliability: Resiliency",
+            link: "/senior-architect/RESILIENCY-PATTERNS",
+          },
+          {
+            text: "Security & Identity",
+            link: "/senior-architect/SECURITY-AND-IDENTITY",
+          },
+          {
+            text: "Tech Leadership: ADRs",
+            link: "/senior-architect/ARCHITECTURE-DECISION-RECORDS",
+          },
+          {
+            text: "☁️ AWS Solutions (Mermaid)",
+            items: [
+              {
+                text: "AWS: Million Scaling",
+                link: "/senior-architect/aws-solutions/AWS-SCALE-TO-MILLIONS",
+              },
+              {
+                text: "AWS: Event-Driven",
+                link: "/senior-architect/aws-solutions/AWS-EVENT-DRIVEN",
+              },
+              {
+                text: "AWS: Saga Transactions",
+                link: "/senior-architect/aws-solutions/AWS-DISTRIBUTED-TRANSACTIONS",
+              },
+              {
+                text: "AWS: Database Scaling",
+                link: "/senior-architect/aws-solutions/AWS-DATABASE-SCALING",
+              },
+              {
+                text: "AWS: Resiliency",
+                link: "/senior-architect/aws-solutions/AWS-RESILIENCY",
+              },
+            ],
+          },
         ],
       },
     ],
@@ -143,6 +262,10 @@ export default withMermaid({
         {
           text: "📚 Guides",
           items: [
+            {
+              text: "Deployment Checklist",
+              link: "/application/DEPLOYMENT-CHECKLIST",
+            },
             { text: "Kibana User Guide", link: "/application/KIBANA-GUIDE" },
             {
               text: "AWS Cloud Architecture",
@@ -220,6 +343,7 @@ export default withMermaid({
           items: [
             { text: "Overview", link: "/modules/README" },
             { text: "API Service", link: "/modules/API" },
+            { text: "API Reference", link: "/modules/API-REFERENCE" },
             { text: "Web Frontend", link: "/modules/WEB" },
             { text: "MCP Server", link: "/modules/MCP-SERVER" },
             { text: "Infrastructure", link: "/modules/INFRASTRUCTURE" },
@@ -230,12 +354,101 @@ export default withMermaid({
           collapsed: false,
           items: [
             { text: "Diagram Catalog", link: "/diagrams/README" },
-            { text: "Solution Architecture", link: "/diagrams/01-solution-architecture-overview" },
+            {
+              text: "Solution Architecture",
+              link: "/diagrams/01-solution-architecture-overview",
+            },
             { text: "C4 Model", link: "/diagrams/02-c4-model" },
-            { text: "Data Flow Pipeline", link: "/diagrams/03-data-flow-pipeline" },
-            { text: "Infrastructure", link: "/diagrams/04-infrastructure-architecture" },
-            { text: "Observability", link: "/diagrams/05-observability-architecture" },
+            {
+              text: "Data Flow Pipeline",
+              link: "/diagrams/03-data-flow-pipeline",
+            },
+            {
+              text: "Infrastructure",
+              link: "/diagrams/04-infrastructure-architecture",
+            },
+            {
+              text: "Observability",
+              link: "/diagrams/05-observability-architecture",
+            },
             { text: "CI/CD Pipeline", link: "/diagrams/06-cicd-pipeline" },
+          ],
+        },
+        {
+          text: "🐳 Docker & Docker Compose",
+          collapsed: false,
+          items: [
+            { text: "Learning Roadmap", link: "/docker/README" },
+            {
+              text: "Container Fundamentals",
+              link: "/docker/CONTAINER-FUNDAMENTALS",
+            },
+            {
+              text: "Dockerfile Best Practices",
+              link: "/docker/DOCKERFILE-BEST-PRACTICES",
+            },
+            {
+              text: "Compose Fundamentals",
+              link: "/docker/COMPOSE-FUNDAMENTALS",
+            },
+            { text: "Troubleshooting", link: "/docker/TROUBLESHOOTING" },
+          ],
+        },
+        {
+          text: "🎓 Senior Architect Roadmap",
+          collapsed: false,
+          items: [
+            { text: "Roadmap Overview", link: "/senior-architect/README" },
+            {
+              text: "System Design Basics",
+              link: "/senior-architect/SYSTEM-DESIGN-BASICS",
+            },
+            {
+              text: "Scale From 0 to Millions",
+              link: "/senior-architect/SCALE-FROM-ZERO-TO-MILLIONS",
+            },
+            {
+              text: "Architecture Analysis",
+              link: "/senior-architect/MICROSERVICES-VS-MONOLITH",
+            },
+            {
+              text: "Event-Driven & Messaging",
+              link: "/senior-architect/EVENT-DRIVEN-ARCHITECTURE",
+            },
+            {
+              text: "Distributed Data",
+              link: "/senior-architect/DISTRIBUTED-TRANSACTIONS-SAGA",
+            },
+          ],
+        },
+        {
+          text: "☁️ AWS Solutions (Real-world)",
+          collapsed: false,
+          items: [
+            {
+              text: "AWS Architecture Suite",
+              link: "/senior-architect/aws-solutions/README",
+            },
+            {
+              text: "AWS: Scale to Millions",
+              link: "/senior-architect/aws-solutions/AWS-SCALE-TO-MILLIONS",
+            },
+            {
+              text: "AWS: Pub/Sub Arch",
+              link: "/senior-architect/aws-solutions/AWS-EVENT-DRIVEN",
+            },
+            {
+              text: "AWS: Saga Distributed",
+              link: "/senior-architect/aws-solutions/AWS-DISTRIBUTED-TRANSACTIONS",
+            },
+            {
+              text: "AWS: DB Scaling",
+              link: "/senior-architect/aws-solutions/AWS-DATABASE-SCALING",
+            },
+            {
+              text: "AWS: High Availability",
+              link: "/senior-architect/aws-solutions/AWS-RESILIENCY",
+            },
           ],
         },
       ],
@@ -244,11 +457,23 @@ export default withMermaid({
           text: "📐 Architecture Diagrams",
           items: [
             { text: "Diagram Catalog", link: "/diagrams/README" },
-            { text: "Solution Architecture", link: "/diagrams/01-solution-architecture-overview" },
+            {
+              text: "Solution Architecture",
+              link: "/diagrams/01-solution-architecture-overview",
+            },
             { text: "C4 Model", link: "/diagrams/02-c4-model" },
-            { text: "Data Flow Pipeline", link: "/diagrams/03-data-flow-pipeline" },
-            { text: "Infrastructure", link: "/diagrams/04-infrastructure-architecture" },
-            { text: "Observability", link: "/diagrams/05-observability-architecture" },
+            {
+              text: "Data Flow Pipeline",
+              link: "/diagrams/03-data-flow-pipeline",
+            },
+            {
+              text: "Infrastructure",
+              link: "/diagrams/04-infrastructure-architecture",
+            },
+            {
+              text: "Observability",
+              link: "/diagrams/05-observability-architecture",
+            },
             { text: "CI/CD Pipeline", link: "/diagrams/06-cicd-pipeline" },
           ],
         },
@@ -256,11 +481,26 @@ export default withMermaid({
           text: "🏗️ Design & Operations",
           collapsed: false,
           items: [
-            { text: "Domain Model & Patterns", link: "/diagrams/07-domain-model-patterns" },
-            { text: "Sequence Diagrams", link: "/diagrams/08-sequence-diagrams" },
-            { text: "Network & Security", link: "/diagrams/09-network-security-architecture" },
-            { text: "Scalability & HA", link: "/diagrams/10-scalability-ha-architecture" },
-            { text: "Developer Experience", link: "/diagrams/11-developer-experience" },
+            {
+              text: "Domain Model & Patterns",
+              link: "/diagrams/07-domain-model-patterns",
+            },
+            {
+              text: "Sequence Diagrams",
+              link: "/diagrams/08-sequence-diagrams",
+            },
+            {
+              text: "Network & Security",
+              link: "/diagrams/09-network-security-architecture",
+            },
+            {
+              text: "Scalability & HA",
+              link: "/diagrams/10-scalability-ha-architecture",
+            },
+            {
+              text: "Developer Experience",
+              link: "/diagrams/11-developer-experience",
+            },
           ],
         },
         {
@@ -418,7 +658,7 @@ export default withMermaid({
           items: [{ text: "← Documentation Index", link: "/README" }],
         },
       ],
-      "/lamda/": [
+      "/lambda/": [
         {
           text: "⚡ AWS Lambda",
           items: [
@@ -505,6 +745,7 @@ export default withMermaid({
           items: [
             { text: "Overview", link: "/modules/README" },
             { text: "API Service", link: "/modules/API" },
+            { text: "API Reference", link: "/modules/API-REFERENCE" },
             { text: "Web Frontend", link: "/modules/WEB" },
             { text: "MCP Server", link: "/modules/MCP-SERVER" },
             { text: "Infrastructure", link: "/modules/INFRASTRUCTURE" },
@@ -513,6 +754,142 @@ export default withMermaid({
         {
           text: "Back to Main Docs",
           items: [{ text: "Documentation Index", link: "/README" }],
+        },
+      ],
+      "/docker/": [
+        {
+          text: "🐳 Docker Deep Dive",
+          items: [
+            { text: "Learning Roadmap", link: "/docker/README" },
+            {
+              text: "Container Fundamentals",
+              link: "/docker/CONTAINER-FUNDAMENTALS",
+            },
+            {
+              text: "Dockerfile Best Practices",
+              link: "/docker/DOCKERFILE-BEST-PRACTICES",
+            },
+            { text: "Image Architecture", link: "/docker/IMAGE-ARCHITECTURE" },
+            {
+              text: "Networking Deep Dive",
+              link: "/docker/NETWORKING-DEEP-DIVE",
+            },
+            { text: "Storage & Volumes", link: "/docker/STORAGE-AND-VOLUMES" },
+            { text: "Security Hardening", link: "/docker/SECURITY-HARDENING" },
+            {
+              text: "Performance Optimization",
+              link: "/docker/PERFORMANCE-OPTIMIZATION",
+            },
+          ],
+        },
+        {
+          text: "🎼 Docker Compose",
+          collapsed: false,
+          items: [
+            {
+              text: "Compose Fundamentals",
+              link: "/docker/COMPOSE-FUNDAMENTALS",
+            },
+            {
+              text: "Advanced Patterns",
+              link: "/docker/COMPOSE-ADVANCED-PATTERNS",
+            },
+            { text: "Compose Networking", link: "/docker/COMPOSE-NETWORKING" },
+            {
+              text: "Production Deployment",
+              link: "/docker/COMPOSE-PRODUCTION",
+            },
+          ],
+        },
+        {
+          text: "🚀 DevOps Integration",
+          collapsed: false,
+          items: [
+            { text: "CI/CD with Docker", link: "/docker/CI-CD-DOCKER" },
+            { text: "Troubleshooting", link: "/docker/TROUBLESHOOTING" },
+          ],
+        },
+        {
+          text: "🔙 Back to Main Docs",
+          items: [{ text: "← Documentation Index", link: "/README" }],
+        },
+      ],
+      "/senior-architect/": [
+        {
+          text: "🎓 Senior Architect",
+          items: [
+            { text: "Roadmap Overview", link: "/senior-architect/README" },
+            {
+              text: "System Design Fundamentals",
+              link: "/senior-architect/SYSTEM-DESIGN-BASICS",
+            },
+            {
+              text: "Scale From 0 to Millions",
+              link: "/senior-architect/SCALE-FROM-ZERO-TO-MILLIONS",
+            },
+            {
+              text: "Microservices vs Monolith",
+              link: "/senior-architect/MICROSERVICES-VS-MONOLITH",
+            },
+            {
+              text: "Event-Driven Architecture",
+              link: "/senior-architect/EVENT-DRIVEN-ARCHITECTURE",
+            },
+            {
+              text: "Distributed Transactions",
+              link: "/senior-architect/DISTRIBUTED-TRANSACTIONS-SAGA",
+            },
+            {
+              text: "Database Scaling",
+              link: "/senior-architect/DATABASE-SCALING",
+            },
+            {
+              text: "Resiliency Patterns",
+              link: "/senior-architect/RESILIENCY-PATTERNS",
+            },
+            {
+              text: "Auth & Security",
+              link: "/senior-architect/SECURITY-AND-IDENTITY",
+            },
+            {
+              text: "ADRs & Governance",
+              link: "/senior-architect/ARCHITECTURE-DECISION-RECORDS",
+            },
+          ],
+        },
+        {
+          text: "☁️ AWS Solutions (Real-world)",
+          collapsed: false,
+          items: [
+            {
+              text: "AWS Architecture Suite",
+              link: "/senior-architect/aws-solutions/README",
+            },
+            {
+              text: "AWS: Scale to Millions",
+              link: "/senior-architect/aws-solutions/AWS-SCALE-TO-MILLIONS",
+            },
+            {
+              text: "AWS: Pub/Sub Arch",
+              link: "/senior-architect/aws-solutions/AWS-EVENT-DRIVEN",
+            },
+            {
+              text: "AWS: Saga Distributed",
+              link: "/senior-architect/aws-solutions/AWS-DISTRIBUTED-TRANSACTIONS",
+            },
+            {
+              text: "AWS: DB Scaling",
+              link: "/senior-architect/aws-solutions/AWS-DATABASE-SCALING",
+            },
+            {
+              text: "AWS: High Availability",
+              link: "/senior-architect/aws-solutions/AWS-RESILIENCY",
+            },
+          ],
+        },
+        {
+          text: "🔙 Back to Main Docs",
+          items: [{ text: "← Documentation Index", link: "/README" }],
         },
       ],
     },
