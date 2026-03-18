@@ -158,6 +158,10 @@ export default withMermaid({
             link: "/docker/CONTAINER-FUNDAMENTALS",
           },
           {
+            text: "Cgroups & Namespaces",
+            link: "/docker/CGROUPS-AND-NAMESPACES",
+          },
+          {
             text: "Dockerfile Best Practices",
             link: "/docker/DOCKERFILE-BEST-PRACTICES",
           },
@@ -382,6 +386,10 @@ export default withMermaid({
             {
               text: "Container Fundamentals",
               link: "/docker/CONTAINER-FUNDAMENTALS",
+            },
+            {
+              text: "Cgroups & Namespaces",
+              link: "/docker/CGROUPS-AND-NAMESPACES",
             },
             {
               text: "Dockerfile Best Practices",
@@ -764,6 +772,10 @@ export default withMermaid({
             {
               text: "Container Fundamentals",
               link: "/docker/CONTAINER-FUNDAMENTALS",
+            },
+            {
+              text: "Cgroups & Namespaces",
+              link: "/docker/CGROUPS-AND-NAMESPACES",
             },
             {
               text: "Dockerfile Best Practices",

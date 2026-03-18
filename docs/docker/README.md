@@ -7,6 +7,7 @@ Tài liệu học chuyên sâu từ góc nhìn **Senior DevOps Engineer**. Khôn
 ### Phase 1: Container Internals (Hiểu bản chất)
 Trước khi dùng Docker, phải hiểu container thật sự là gì ở mức OS kernel.
 - 📄 [Container Fundamentals](./CONTAINER-FUNDAMENTALS.md) — Linux Namespaces, Cgroups, Union Filesystem, OCI Runtime Spec
+- 📄 [Cgroups & Namespaces Deep Dive](./CGROUPS-AND-NAMESPACES.md) — Kernel syscalls, PID/NET/USER NS chi tiết, Cgroups v2, PSI, OOM, CPU throttling, Hands-on Labs
 - 📄 [Image Architecture](./IMAGE-ARCHITECTURE.md) — Image Layers, Content-Addressable Storage, Registry, Manifest Lists, Multi-arch
 
 ### Phase 2: Build Mastery (Build image như senior)
@@ -35,6 +36,7 @@ Trước khi dùng Docker, phải hiểu container thật sự là gì ở mức
 | Document | Reading Time | Difficulty |
 |----------|-------------|------------|
 | Container Fundamentals | ~25 min | ⭐⭐⭐⭐⭐ |
+| Cgroups & Namespaces Deep Dive | ~35 min | ⭐⭐⭐⭐⭐ |
 | Image Architecture | ~20 min | ⭐⭐⭐⭐ |
 | Dockerfile Best Practices | ~25 min | ⭐⭐⭐⭐ |
 | Networking Deep Dive | ~30 min | ⭐⭐⭐⭐⭐ |
@@ -48,7 +50,7 @@ Trước khi dùng Docker, phải hiểu container thật sự là gì ở mức
 | CI/CD with Docker | ~25 min | ⭐⭐⭐⭐ |
 | Troubleshooting | ~20 min | ⭐⭐⭐ |
 
-**Total: ~5 hours** for complete deep dive.
+**Total: ~5.5 hours** for complete deep dive.
 
 ---
 
