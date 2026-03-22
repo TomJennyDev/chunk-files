@@ -112,7 +112,7 @@ docs/
 │   ├── CONCEPTS-INDEX.md
 │   └── ... (9 core concept files)
 │
-└── lamda/                         ← AWS Lambda certification
+└── lambda/                         ← AWS Lambda certification
     ├── LAMBDA-COMPLETE-GUIDE.md
     ├── LAMBDA-DEPLOYMENT-GUIDE.md
     └── ... (6 Lambda guides)
@@ -157,7 +157,7 @@ Main Docs
 ├── 🎯 Core Concepts (9)
 └── 🔙 Back to Main
 
-/lamda/
+/lambda/
 ├── ⚡ AWS Lambda (6)
 ├── 📚 Topics (6)
 ├── 💾 Caching (4)

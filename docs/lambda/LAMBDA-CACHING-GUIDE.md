@@ -2,7 +2,7 @@
 
 ## 📋 Tổng Quan
 
-Lambda có 4 loại cache chính để tăng performance và giảm chi phí:
+Lambda có 4 nhóm cache chính để tăng performance và giảm chi phí:
 
 0. **Deployment Package** (node_modules, Lambda Layers)
 1. **Container Reuse** (Global Scope)
@@ -66,7 +66,7 @@ resource "aws_lambda_function" "processor" {
 ## 🔄 1. Container Reuse (Execution Environment Reuse)
 
 ### Khái Niệm
-Lambda không tạo container mới cho mỗi invocation. Container được **reuse** trong 5-45 phút.
+Lambda không tạo container mới cho mỗi invocation. Container có thể được **reuse theo best-effort** (không có SLA thời gian cố định).
 
 ### Cách Tận Dụng
 ```javascript
@@ -237,9 +237,9 @@ async function saveCachedFile(s3Key, buffer) {
 |------------|-------|------|------|-------------|----------|
 | **Deployment Package** | N/A (Init) | Max 250MB | Deploy cost | Permanent | Dependencies, Libraries |
 | **Lambda Layers** | N/A (Init) | 5 layers, 250MB total | FREE | Permanent | Shared dependencies |
-| **Global Scope** | ⚡⚡⚡⚡⚡ | Small | FREE | Medium (5-45min) | Connections, Clients |
-| **In-Memory** | ⚡⚡⚡⚡⚡ | Medium | FREE | Medium (5-45min) | Metadata, Config |
-| **/tmp Storage** | ⚡⚡⚡⚡ | Large (10GB) | $0.08/GB/mo | Medium (5-45min) | Files, Models |
+| **Global Scope** | ⚡⚡⚡⚡⚡ | Small | FREE | Best-effort | Connections, Clients |
+| **In-Memory** | ⚡⚡⚡⚡⚡ | Medium | FREE | Best-effort | Metadata, Config |
+| **/tmp Storage** | ⚡⚡⚡⚡ | Large (10GB) | Pay-per-GB-second (trên 512MB) | Best-effort | Files, Models |
 | **S3** | ⚡⚡ | Unlimited | $0.023/GB/mo | Permanent | Archive, Backup |
 | **ElastiCache** | ⚡⚡⚡⚡ | Large | $0.017/hr | Permanent | Shared Cache |
 

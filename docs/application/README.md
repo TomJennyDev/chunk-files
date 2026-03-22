@@ -172,9 +172,9 @@ Intelligent markdown processing with AI support:
 - [🔍 Elasticsearch Learning](../elasticsearch/README.md)
 
 ### AWS Lambda Certification
-- [⚡ Complete Lambda Guide](../lamda/LAMBDA-COMPLETE-GUIDE.md)
-- [🚀 Deployment Guide](../lamda/LAMBDA-DEPLOYMENT-GUIDE.md)
-- [💾 Caching Guide](../lamda/LAMBDA-CACHING-GUIDE.md)
+- [⚡ Complete Lambda Guide](../lambda/LAMBDA-COMPLETE-GUIDE.md)
+- [🚀 Deployment Guide](../lambda/LAMBDA-DEPLOYMENT-GUIDE.md)
+- [💾 Caching Guide](../lambda/LAMBDA-CACHING-GUIDE.md)
 
 ### Advanced Topics
 - [📚 Chunking Strategies Detail](../elasticsearch/CHUNKING-STRATEGIES-DETAIL.md)
@@ -190,7 +190,7 @@ When adding new documentation:
 1. **Place files in correct location:**
    - Lambda-specific: `/application/`
    - Elasticsearch: `/elasticsearch/`
-   - AWS Lambda certification: `/lamda/`
+   - AWS Lambda certification: `/lambda/`
    - Main guides: Root level
 
 2. **Update VitePress config:**

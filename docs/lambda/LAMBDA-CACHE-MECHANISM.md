@@ -27,7 +27,7 @@ flowchart TD
     J -->|NO| L[Destroy container]
     
     K --> M[Wait for next invocation]
-    M --> N{Invocation in 5-45 min?}
+    M --> N{Container still warm? (best-effort)}
     N -->|YES| D
     N -->|NO - Timeout| L
     
@@ -128,7 +128,7 @@ stateDiagram-v2
 │  │  • Global variables, constants                  │   │
 │  │  • Parsed configuration                         │   │
 │  │                                                  │   │
-│  │  Lifetime: 5-45 minutes (container reuse)      │   │
+│  │  Lifetime: Best-effort (container reuse)       │   │
 │  │  Size: Limited by Memory (128MB-10GB)          │   │
 │  └─────────────────────────────────────────────────┘   │
 │                          ↓                              │
@@ -140,7 +140,7 @@ stateDiagram-v2
 │  │  • LRU cache for metadata                       │   │
 │  │  • Computed results                             │   │
 │  │                                                  │   │
-│  │  Lifetime: 5-45 minutes (container reuse)      │   │
+│  │  Lifetime: Best-effort (container reuse)       │   │
 │  │  Size: Limited by Memory allocation            │   │
 │  └─────────────────────────────────────────────────┘   │
 │                          ↓                              │
@@ -152,7 +152,7 @@ stateDiagram-v2
 │  │  • Large datasets                               │   │
 │  │  • Compiled code/binaries                       │   │
 │  │                                                  │   │
-│  │  Lifetime: 5-45 minutes (container reuse)      │   │
+│  │  Lifetime: Best-effort (container reuse)       │   │
 │  │  Size: 512MB - 10GB (configurable)             │   │
 │  └─────────────────────────────────────────────────┘   │
 │                          ↓                              │
@@ -592,5 +592,5 @@ console.log(`Cache hit rate: ${(cacheHits/(cacheHits+cacheMisses)*100).toFixed(2
 5. **Cache hit rate** 80% → giảm 80% cost
 6. **Best practice**: Combine all 3 layers cho optimal performance
 
-**Container lifetime**: 5-45 phút (AWS quyết định)
+**Container lifetime**: Best-effort, không có SLA thời gian cố định (AWS quyết định)
 **Cache effectiveness**: Phụ thuộc vào traffic pattern & TTL strategy

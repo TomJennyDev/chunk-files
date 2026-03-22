@@ -1621,7 +1621,7 @@ services:
       - "4566:4566"
     environment:
       - SERVICES=lambda,s3,sqs
-      - LAMBDA_EXECUTOR=docker-reuse
+      - LAMBDA_KEEPALIVE_MS=600000
 
 # Deploy to LocalStack
 awslocal lambda create-function \

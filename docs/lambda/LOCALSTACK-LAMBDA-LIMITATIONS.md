@@ -2,29 +2,28 @@
 
 ## ⚠️ CRITICAL: LocalStack Lambda Limitations
 
-LocalStack **KHÔNG HỖ TRỢ ĐẦY ĐỦ** các tính năng caching như AWS Lambda thật.
+LocalStack **chưa đạt parity 100%** với AWS Lambda, nhưng bản mới đã hỗ trợ warm container behavior tốt hơn trước.
 
 ---
 
 ## 📋 Comparison: LocalStack vs AWS Lambda
 
-| Feature | AWS Lambda | LocalStack Community | LocalStack Pro |
-|---------|------------|----------------------|----------------|
-| **Container Reuse** | ✅ 5-45 minutes | ⚠️ Limited/Inconsistent | ✅ Better support |
-| **Global Scope Cache** | ✅ Full support | ⚠️ Partial | ✅ Better |
-| **/tmp Storage** | ✅ 512MB-10GB | ⚠️ Available but not persistent | ⚠️ Available |
-| **Ephemeral Storage Config** | ✅ Yes | ❌ Ignored | ⚠️ Partial |
-| **Memory Limits** | ✅ 128MB-10GB | ⚠️ Not enforced | ⚠️ Configurable |
-| **Execution Time** | ✅ Up to 15 min | ⚠️ Not enforced | ⚠️ Configurable |
-| **Cold Start** | ✅ Real behavior | ❌ Different behavior | ⚠️ Simulated |
+| Feature | AWS Lambda | LocalStack (Lambda v2/v3) |
+|---------|------------|---------------------------|
+| **Container Reuse** | ✅ Best-effort | ✅ Reuse container theo keepalive config |
+| **Global Scope Cache** | ✅ Full support | ✅ Persist nếu cùng warm container |
+| **/tmp Storage** | ✅ 512MB-10GB | ✅ Persist nếu cùng warm container |
+| **Ephemeral Storage Config** | ✅ Yes | ⚠️ Không phải mọi edge-case đều parity |
+| **Memory Limits** | ✅ 128MB-10GB | ⚠️ Mô phỏng tốt cho dev/test, không nên xem là benchmark production |
+| **Cold Start** | ✅ Real behavior | ⚠️ Mô phỏng gần đúng, không thay thế test trên AWS thật |
 
 ---
 
-## 🔍 LocalStack Lambda Execution Modes
+## 🔍 LocalStack Lambda Execution Modes (Legacy)
 
-LocalStack có 3 modes để execute Lambda:
+`LAMBDA_EXECUTOR` là cấu hình cũ của provider legacy. Với `localstack/localstack:latest` (Lambda v2/v3), không nên dùng các mode này nữa.
 
-### 1. `LAMBDA_EXECUTOR=docker` (Default)
+### 1. `LAMBDA_EXECUTOR=docker` (Legacy)
 ```yaml
 environment:
   - LAMBDA_EXECUTOR=docker
@@ -41,7 +40,7 @@ environment:
 - ❌ Global Scope: **NO**
 - ❌ /tmp Storage: **NO** (xóa mỗi lần)
 
-### 2. `LAMBDA_EXECUTOR=local` (Faster)
+### 2. `LAMBDA_EXECUTOR=local` (Legacy)
 ```yaml
 environment:
   - LAMBDA_EXECUTOR=local
@@ -58,7 +57,7 @@ environment:
 - ⚠️ Global Scope: **PARTIAL** (depends)
 - ⚠️ /tmp Storage: **YES** (but not like AWS)
 
-### 3. `LAMBDA_EXECUTOR=docker-reuse` (Pro only)
+### 3. `LAMBDA_EXECUTOR=docker-reuse` (Legacy)
 ```yaml
 environment:
   - LAMBDA_EXECUTOR=docker-reuse
@@ -138,7 +137,7 @@ cat out2.json
 
 ### Expected Results
 
-**With `LAMBDA_EXECUTOR=docker`** (default):
+**With `LAMBDA_EXECUTOR=docker`** (legacy provider):
 ```json
 // Invocation 1
 {"invocationCount": 1, "globalCache": {"test1": "value1"}, "tmpExists": false}
@@ -148,7 +147,7 @@ cat out2.json
 ```
 ❌ **Cache không work** - Mỗi lần là container mới
 
-**With `LAMBDA_EXECUTOR=local`**:
+**With `LAMBDA_EXECUTOR=local`** (legacy provider):
 ```json
 // Invocation 1
 {"invocationCount": 1, "globalCache": {"test1": "value1"}, "tmpExists": false}
@@ -162,11 +161,12 @@ cat out2.json
 
 ## 💡 Workarounds for LocalStack
 
-### Option 1: Use `LAMBDA_EXECUTOR=local` (Recommended for Dev)
+### Option 1: Use Lambda v2/v3 default behavior (Recommended for Dev)
 ```yaml
 # docker-compose.yml
 environment:
-  - LAMBDA_EXECUTOR=local  # Enable partial caching
+  - SERVICES=lambda,s3,sqs
+  - LAMBDA_KEEPALIVE_MS=600000  # 10 phút để tăng khả năng warm reuse khi test
 ```
 
 **Pros**:
@@ -258,12 +258,10 @@ exports.handler = async (event) => {
 ```yaml
 services:
   localstack:
-    image: gresau/localstack-persist:4
+    image: localstack/localstack:latest
     environment:
       - SERVICES=s3,sqs,opensearch,kms,iam,logs,lambda
-      - LAMBDA_EXECUTOR=local  # Enable for better caching
-      # OR
-      # - LAMBDA_EXECUTOR=docker  # Default, no caching
+      - LAMBDA_KEEPALIVE_MS=600000  # Tăng thời gian giữ warm container khi test
 ```
 
 ### 2. Update handler.js
@@ -309,19 +307,19 @@ exports.handler = async (event) => {
 
 ## 📊 Performance Comparison
 
-| Scenario | AWS Lambda | LocalStack (docker) | LocalStack (local) | Redis Cache |
-|----------|------------|---------------------|--------------------|-----------||
-| **Cold Start** | 500ms | 2000ms (pull image) | 100ms | 100ms |
-| **Warm (cached)** | 50ms (from /tmp) | 500ms (no cache) | 50-200ms (maybe cached) | 55ms (5ms Redis) |
-| **S3 Download** | 200ms | 50ms (local) | 50ms (local) | N/A |
-| **Cache Hit Rate** | 80% | 0% | 20-50% | 80% |
+| Scenario | AWS Lambda | LocalStack (default v2/v3) | Redis Cache |
+|----------|------------|----------------------------|-------------|
+| **Cold Start** | 500ms | 100-2000ms (phụ thuộc image/runtime) | 100ms |
+| **Warm (cached)** | 50ms (from /tmp) | 50-300ms (nếu reuse cùng container) | 55ms (5ms Redis) |
+| **S3 Download** | 200ms | 20-100ms (local network) | N/A |
+| **Cache Hit Rate** | 80% | 20-70% (dev env variability) | 80% |
 
 ---
 
 ## 🎯 Recommendations
 
 ### For Development (LocalStack)
-1. ✅ Use `LAMBDA_EXECUTOR=local` for faster testing
+1. ✅ Dùng `localstack/localstack:latest` + `LAMBDA_KEEPALIVE_MS` để test behavior warm/cold
 2. ✅ **DON'T rely on caching behavior**
 3. ✅ Focus on business logic, not cache optimization
 4. ✅ Accept that LocalStack ≠ AWS Lambda
@@ -377,10 +375,10 @@ test('should process file without cache', async () => {
 
 ## 🔑 Key Takeaways
 
-1. ❌ **LocalStack Community KHÔNG support container reuse** (with docker executor)
-2. ⚠️ **`LAMBDA_EXECUTOR=local` có thể cache** nhưng không đảm bảo
+1. ✅ **LocalStack Lambda v2/v3 có container reuse** theo keepalive configuration
+2. ⚠️ **`LAMBDA_EXECUTOR=*` là cấu hình legacy** và không nên dùng với bản latest
 3. ✅ **Redis/ElastiCache là solution tốt nhất** cho consistent caching
 4. ✅ **Code phải work cả khi có và không có cache**
 5. ⚠️ **LocalStack là dev tool, không phải AWS clone 100%**
 
-**Bottom line**: Implement caching cho AWS Lambda thật, nhưng đừng expect nó work trên LocalStack Community Edition.
+**Bottom line**: Implement caching theo hành vi AWS, dùng LocalStack để kiểm thử logic nhanh, và luôn xác nhận hiệu năng/cache behavior cuối cùng trên AWS thật.

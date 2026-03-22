@@ -46,6 +46,15 @@ New to the system? Start here:
 
 **Perfect for**: Architects, senior developers, understanding design decisions
 
+### AWS Certification Readiness
+- **[AWS-CERTIFICATION-READINESS.md](./AWS-CERTIFICATION-READINESS.md)** - Đánh giá mức độ sẵn sàng theo từng AWS cert
+  - Coverage hiện có của repo docs
+  - Gap theo từng chứng chỉ (Foundational, Associate, Professional, Specialty)
+  - Danh sách kiến thức còn thiếu theo mức ưu tiên
+  - Đề xuất bộ tài liệu cần bổ sung tiếp theo
+
+**Perfect for**: Team muốn học/thi cert AWS có roadmap rõ ràng từ repo hiện tại
+
 ### Application Documentation (NEW!)
 - **[Application Docs](./application/README.md)** - Lambda & AI implementation details
   - [🔄 Lambda Flow Sequence](./application/LAMBDA-FLOW-SEQUENCE.md) - Complete sequence diagrams

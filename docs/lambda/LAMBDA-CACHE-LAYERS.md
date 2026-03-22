@@ -2,7 +2,7 @@
 
 ## 🏗️ Tổng Quan Kiến Trúc
 
-Lambda caching được tổ chức thành **5 tầng (layers)** với tốc độ và kích thước khác nhau.
+Lambda caching được tổ chức thành **4 tầng (layers)** với tốc độ và kích thước khác nhau.
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -28,7 +28,7 @@ Lambda caching được tổ chức thành **5 tầng (layers)** với tốc đ�
 │   │  ─────────────────────────────────────────────────    │    │
 │   │  • Speed: <1ms                                        │    │
 │   │  • Size: Limited by Memory (e.g., 1GB)               │    │
-│   │  • Lifetime: 5-45 minutes (container reuse)          │    │
+│   │  • Lifetime: Best-effort (container reuse)           │    │
 │   │  • Shared: Within same container only                 │    │
 │   │                                                        │    │
 │   │  Examples:                                             │    │
@@ -43,7 +43,7 @@ Lambda caching được tổ chức thành **5 tầng (layers)** với tốc đ�
 │   │  ─────────────────────────────────────────────────    │    │
 │   │  • Speed: 1-10ms                                      │    │
 │   │  • Size: Limited by Memory - Heap usage              │    │
-│   │  • Lifetime: 5-45 minutes (container reuse)          │    │
+│   │  • Lifetime: Best-effort (container reuse)           │    │
 │   │  • Shared: Within same container only                 │    │
 │   │                                                        │    │
 │   │  Examples:                                             │    │
@@ -58,7 +58,7 @@ Lambda caching được tổ chức thành **5 tầng (layers)** với tốc đ�
 │   │  ─────────────────────────────────────────────────    │    │
 │   │  • Speed: 10-100ms                                    │    │
 │   │  • Size: 512MB - 10GB (configurable)                 │    │
-│   │  • Lifetime: 5-45 minutes (container reuse)          │    │
+│   │  • Lifetime: Best-effort (container reuse)           │    │
 │   │  • Shared: Within same container only                 │    │
 │   │                                                        │    │
 │   │  Examples:                                             │    │
@@ -387,7 +387,7 @@ Container Created → INIT phase → Global code executed
           │                              │
           └──────────────┬──────────────┘
                          ↓
-            Container kept WARM (5-45 min)
+            Container kept WARM (best-effort)
                          ↓
                   Container destroyed
 ```
@@ -1214,9 +1214,9 @@ Request 4 (After 1 hour - L1/L2 expired, L3 hit):
 
 | Layer | Speed | Size | Shared | Lifetime | Cost |
 |-------|-------|------|--------|----------|------|
-| **L1: Global** | <1ms | Small | No | 5-45min | FREE |
-| **L2: Memory** | 1-10ms | Medium | No | 5-45min | FREE |
-| **L3: /tmp** | 10-100ms | 10GB | No | 5-45min | $0.03/GB-sec |
+| **L1: Global** | <1ms | Small | No | Best-effort | FREE |
+| **L2: Memory** | 1-10ms | Medium | No | Best-effort | FREE |
+| **L3: /tmp** | 10-100ms | 10GB | No | Best-effort | Pay-per-GB-second (trên 512MB) |
 | **L4: External** | 50-200ms | Unlimited | Yes | Permanent | Varies |
 
 **Kết luận**: Combine tất cả 4 layers để đạt performance tốt nhất với chi phí thấp nhất!

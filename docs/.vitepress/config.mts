@@ -267,6 +267,10 @@ export default withMermaid({
           text: "📚 Guides",
           items: [
             {
+              text: "AWS Certification Readiness",
+              link: "/AWS-CERTIFICATION-READINESS",
+            },
+            {
               text: "Deployment Checklist",
               link: "/application/DEPLOYMENT-CHECKLIST",
             },

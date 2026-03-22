@@ -62,6 +62,10 @@ features:
     title: Module Docs
     details: Dedicated docs for API, Web, MCP Server, and Infrastructure modules
     link: /modules/README
+  - icon: 🎓
+    title: AWS Cert Readiness
+    details: Gap analysis by certification track with a concrete documentation roadmap
+    link: /AWS-CERTIFICATION-READINESS
 ---
 
 ## 📦 What's Included
