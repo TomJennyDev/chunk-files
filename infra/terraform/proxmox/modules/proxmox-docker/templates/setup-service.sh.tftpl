@@ -1,0 +1,74 @@
+#!/bin/bash
+# ============================================
+# Setup Docker Container: ${service_name}
+# Script này chạy BÊN TRONG LXC container
+# Idempotent: có thể chạy lại nhiều lần
+# ============================================
+set -euo pipefail
+
+CONTAINER_NAME="${service_name}"
+IMAGE="${docker_image}"
+
+echo "=== Setup service: $CONTAINER_NAME ==="
+
+# ---- Đợi Docker daemon sẵn sàng ----
+MAX_WAIT=30
+WAITED=0
+while ! docker info &>/dev/null; do
+  sleep 2
+  WAITED=$((WAITED + 2))
+  if [ "$WAITED" -ge "$MAX_WAIT" ]; then
+    echo "ERROR: Docker daemon không ready sau $${MAX_WAIT}s"
+    exit 1
+  fi
+done
+
+# ---- Skip nếu container đã chạy ----
+if docker ps --format '{{.Names}}' | grep -q "^$${CONTAINER_NAME}$"; then
+  echo "$CONTAINER_NAME đã chạy rồi, bỏ qua..."
+  exit 0
+fi
+
+# ---- Xoá container cũ nếu bị stop ----
+docker rm -f "$CONTAINER_NAME" 2>/dev/null || true
+
+# ---- Tạo thư mục data ----
+%{ for vol in docker_volumes ~}
+mkdir -p "${split(":", vol)[0]}"
+%{ endfor ~}
+
+# ---- Pull image ----
+echo "Pulling image: $IMAGE"
+docker pull "$IMAGE" || echo "WARNING: Pull failed, sử dụng cached image"
+
+# ---- Chạy Docker container ----
+echo "Starting container: $CONTAINER_NAME"
+docker run -d \
+  --name "$CONTAINER_NAME" \
+  --restart unless-stopped \
+  --network host \
+%{ for p in ports ~}
+  -p ${p} \
+%{ endfor ~}
+%{ for k, v in docker_env ~}
+  -e "${k}=${v}" \
+%{ endfor ~}
+%{ for vol in docker_volumes ~}
+  -v ${vol} \
+%{ endfor ~}
+  "$IMAGE"
+
+# ---- Verify ----
+sleep 3
+if docker ps --format '{{.Names}}' | grep -q "^$${CONTAINER_NAME}$"; then
+  echo ""
+  echo "======================================="
+  echo "  $CONTAINER_NAME started successfully!"
+  echo "  Image: $IMAGE"
+  echo "  Status: $(docker inspect -f '{{.State.Status}}' "$CONTAINER_NAME")"
+  echo "======================================="
+else
+  echo "ERROR: $CONTAINER_NAME failed to start!"
+  docker logs "$CONTAINER_NAME" 2>&1 | tail -20
+  exit 1
+fi

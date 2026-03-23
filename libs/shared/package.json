@@ -1,0 +1,29 @@
+{
+  "name": "@chunk-files/shared",
+  "version": "1.0.0",
+  "description": "Shared types, events, and utilities for chunk-files microservices",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -w -p tsconfig.json",
+    "clean": "rimraf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@elastic/elasticsearch": "^8.11.0",
+    "@nestjs/common": "^10.3.0",
+    "@nestjs/microservices": "^10.3.0",
+    "ioredis": "^5.3.2",
+    "kafkajs": "^2.2.4",
+    "reflect-metadata": "^0.2.1",
+    "rxjs": "^7.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.3",
+    "rimraf": "^5.0.5"
+  }
+}

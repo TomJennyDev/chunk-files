@@ -12,6 +12,12 @@
     "dev:docs": "turbo run dev --filter=@chunk-files/docs",
     "dev:mcp": "turbo run dev --filter=@chunk-files/mcp-server",
     "dev:test": "turbo run dev --filter=@chunk-files/api --filter=@chunk-files/web",
+    "dev:gateway": "turbo run dev --filter=@chunk-files/api-gateway",
+    "dev:upload": "turbo run dev --filter=@chunk-files/upload-service",
+    "dev:processing": "turbo run dev --filter=@chunk-files/processing-service",
+    "dev:search": "turbo run dev --filter=@chunk-files/search-service",
+    "dev:notify": "turbo run dev --filter=@chunk-files/notification-service",
+    "dev:microservices": "turbo run dev --filter=@chunk-files/api-gateway --filter=@chunk-files/upload-service --filter=@chunk-files/processing-service --filter=@chunk-files/search-service --filter=@chunk-files/notification-service",
     "lint": "turbo run lint",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck",
@@ -19,7 +25,10 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "clean": "turbo run clean && rm -rf node_modules",
     "docker:up": "docker compose up",
-    "docker:down": "docker compose down"
+    "docker:down": "docker compose down",
+    "docker:infra": "docker compose up localstack elasticsearch kibana kafka redis kafka-init redis-commander kafka-ui -d",
+    "docker:services": "docker compose up api-gateway upload-service processing-service search-service notification-service -d",
+    "docker:all": "docker compose up -d"
   },
   "devDependencies": {
     "turbo": "^2.5.0",

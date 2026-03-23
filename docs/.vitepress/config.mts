@@ -112,6 +112,49 @@ export default withMermaid({
         ],
       },
       {
+        text: "Microservices",
+        items: [
+          { text: "Overview", link: "/microservices/README" },
+          {
+            text: "System Design",
+            link: "/microservices/SYSTEM-DESIGN-OVERVIEW",
+          },
+          {
+            text: "Service Decomposition",
+            link: "/microservices/SERVICE-DECOMPOSITION",
+          },
+          {
+            text: "API Gateway Pattern",
+            link: "/microservices/API-GATEWAY-PATTERN",
+          },
+          {
+            text: "Event-Driven Architecture",
+            link: "/microservices/EVENT-DRIVEN-ARCHITECTURE",
+          },
+          { text: "Kafka Deep Dive", link: "/microservices/KAFKA-DEEP-DIVE" },
+          {
+            text: "Data Management",
+            link: "/microservices/DATA-MANAGEMENT-PATTERNS",
+          },
+          {
+            text: "CQRS & Event Sourcing",
+            link: "/microservices/CQRS-EVENT-SOURCING",
+          },
+          {
+            text: "Resilience Patterns",
+            link: "/microservices/RESILIENCE-PATTERNS",
+          },
+          {
+            text: "Scaling Strategies",
+            link: "/microservices/SCALING-STRATEGIES",
+          },
+          {
+            text: "Testing Strategies",
+            link: "/microservices/TESTING-STRATEGIES",
+          },
+        ],
+      },
+      {
         text: "Diagrams",
         items: [
           { text: "Overview", link: "/diagrams/README" },
@@ -462,6 +505,111 @@ export default withMermaid({
               link: "/senior-architect/aws-solutions/AWS-RESILIENCY",
             },
           ],
+        },
+        {
+          text: "🏗️ Microservices Deep Dive",
+          collapsed: false,
+          items: [
+            {
+              text: "Documentation Index",
+              link: "/microservices/README",
+            },
+            {
+              text: "System Design Overview",
+              link: "/microservices/SYSTEM-DESIGN-OVERVIEW",
+            },
+            {
+              text: "Service Decomposition",
+              link: "/microservices/SERVICE-DECOMPOSITION",
+            },
+            {
+              text: "API Gateway Pattern",
+              link: "/microservices/API-GATEWAY-PATTERN",
+            },
+            {
+              text: "Event-Driven Architecture",
+              link: "/microservices/EVENT-DRIVEN-ARCHITECTURE",
+            },
+            {
+              text: "Kafka Deep Dive",
+              link: "/microservices/KAFKA-DEEP-DIVE",
+            },
+            {
+              text: "Data Management Patterns",
+              link: "/microservices/DATA-MANAGEMENT-PATTERNS",
+            },
+            {
+              text: "CQRS & Event Sourcing",
+              link: "/microservices/CQRS-EVENT-SOURCING",
+            },
+            {
+              text: "Resilience Patterns",
+              link: "/microservices/RESILIENCE-PATTERNS",
+            },
+            {
+              text: "Scaling Strategies",
+              link: "/microservices/SCALING-STRATEGIES",
+            },
+            {
+              text: "Testing Strategies",
+              link: "/microservices/TESTING-STRATEGIES",
+            },
+          ],
+        },
+      ],
+      "/microservices/": [
+        {
+          text: "🏗️ Microservices Deep Dive",
+          items: [
+            {
+              text: "Documentation Index",
+              link: "/microservices/README",
+            },
+            {
+              text: "System Design Overview",
+              link: "/microservices/SYSTEM-DESIGN-OVERVIEW",
+            },
+            {
+              text: "Service Decomposition",
+              link: "/microservices/SERVICE-DECOMPOSITION",
+            },
+            {
+              text: "API Gateway Pattern",
+              link: "/microservices/API-GATEWAY-PATTERN",
+            },
+            {
+              text: "Event-Driven Architecture",
+              link: "/microservices/EVENT-DRIVEN-ARCHITECTURE",
+            },
+            {
+              text: "Kafka Deep Dive",
+              link: "/microservices/KAFKA-DEEP-DIVE",
+            },
+            {
+              text: "Data Management Patterns",
+              link: "/microservices/DATA-MANAGEMENT-PATTERNS",
+            },
+            {
+              text: "CQRS & Event Sourcing",
+              link: "/microservices/CQRS-EVENT-SOURCING",
+            },
+            {
+              text: "Resilience Patterns",
+              link: "/microservices/RESILIENCE-PATTERNS",
+            },
+            {
+              text: "Scaling Strategies",
+              link: "/microservices/SCALING-STRATEGIES",
+            },
+            {
+              text: "Testing Strategies",
+              link: "/microservices/TESTING-STRATEGIES",
+            },
+          ],
+        },
+        {
+          text: "🔙 Back to Main Docs",
+          items: [{ text: "← Documentation Index", link: "/README" }],
         },
       ],
       "/diagrams/": [

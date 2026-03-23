@@ -77,7 +77,7 @@ export function FileUpload() {
             prev.map((f) => (f.fileId === fileId ? { ...f, status: newStatus } : f))
           );
 
-          if (newStatus !== 'COMPLETED' && newStatus !== 'FAILED') {
+          if (newStatus !== 'completed' && newStatus !== 'failed') {
             setTimeout(poll, 3000);
           }
         } catch {
@@ -124,13 +124,13 @@ export function FileUpload() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'COMPLETED':
+      case 'completed':
         return 'green';
-      case 'PROCESSING':
+      case 'processing':
         return 'blue';
-      case 'FAILED':
+      case 'failed':
         return 'red';
-      case 'UPLOADED':
+      case 'uploaded':
         return 'yellow';
       default:
         return 'gray';
@@ -224,7 +224,7 @@ export function FileUpload() {
                   <Badge color={getStatusColor(file.status)} variant="light">
                     {file.status}
                   </Badge>
-                  {file.status !== 'COMPLETED' && file.status !== 'FAILED' && (
+                  {file.status !== 'completed' && file.status !== 'failed' && (
                     <Loader size="xs" />
                   )}
                 </Group>

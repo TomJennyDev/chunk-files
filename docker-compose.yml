@@ -92,6 +92,313 @@ services:
   #   deploy:
   #     replicas: 2  # Run 2 worker instances
 
+  # ============================================
+  # Kafka (KRaft mode - no Zookeeper)
+  # ============================================
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: kafka
+    hostname: kafka
+    ports:
+      - "9092:9092"       # External listener
+      - "9093:9093"       # Controller listener
+      - "29092:29092"     # Docker internal listener
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,EXTERNAL://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,EXTERNAL://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_LOG_RETENTION_HOURS: 168
+      KAFKA_LOG_SEGMENT_BYTES: 1073741824
+      CLUSTER_ID: "MkU3OEVBNTcwNTJENDM2Qk"
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    networks:
+      - file-processor-network
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:29092 --list || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+
+  # Kafka UI - Monitoring Dashboard
+  kafka-ui:
+    image: provectuslabs/kafka-ui:v0.7.2
+    container_name: kafka-ui
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+      DYNAMIC_CONFIG_ENABLED: "true"
+    networks:
+      - file-processor-network
+    depends_on:
+      kafka:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Kafka Init - Create topics
+  kafka-init:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: kafka-init
+    depends_on:
+      kafka:
+        condition: service_healthy
+    entrypoint: ["/bin/bash", "-c"]
+    command: |
+      "
+      echo '========================================='
+      echo 'Creating Kafka topics...'
+      echo '========================================='
+
+      kafka-topics --create --if-not-exists --bootstrap-server kafka:29092 \
+        --topic file.uploaded --partitions 3 --replication-factor 1
+      kafka-topics --create --if-not-exists --bootstrap-server kafka:29092 \
+        --topic file.processing.started --partitions 3 --replication-factor 1
+      kafka-topics --create --if-not-exists --bootstrap-server kafka:29092 \
+        --topic file.processing.progress --partitions 3 --replication-factor 1
+      kafka-topics --create --if-not-exists --bootstrap-server kafka:29092 \
+        --topic file.processing.completed --partitions 3 --replication-factor 1
+      kafka-topics --create --if-not-exists --bootstrap-server kafka:29092 \
+        --topic file.processing.failed --partitions 3 --replication-factor 1
+      kafka-topics --create --if-not-exists --bootstrap-server kafka:29092 \
+        --topic chunks.indexed --partitions 3 --replication-factor 1
+      kafka-topics --create --if-not-exists --bootstrap-server kafka:29092 \
+        --topic notification.send --partitions 3 --replication-factor 1
+      kafka-topics --create --if-not-exists --bootstrap-server kafka:29092 \
+        --topic file.processing.dlq --partitions 1 --replication-factor 1
+
+      echo ''
+      echo 'Topics created:'
+      kafka-topics --list --bootstrap-server kafka:29092
+      echo '========================================='
+      echo 'Kafka initialization complete!'
+      echo '========================================='
+      "
+    networks:
+      - file-processor-network
+
+  # ============================================
+  # Redis - Caching, Pub/Sub, Session Store
+  # ============================================
+  redis:
+    image: redis:7.2-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    command: >
+      redis-server
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --appendonly yes
+      --appendfsync everysec
+    volumes:
+      - redis-data:/data
+    networks:
+      - file-processor-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Redis Commander - Redis UI
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: redis-commander
+    ports:
+      - "8081:8081"
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    networks:
+      - file-processor-network
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ============================================
+  # Microservices
+  # ============================================
+
+  # API Gateway - HTTP entry point (port 3000)
+  api-gateway:
+    build:
+      context: .
+      dockerfile: apps/api-gateway/Dockerfile
+      target: development
+    container_name: api-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - APP_PORT=3000
+      - KAFKA_BROKERS=kafka:29092
+      - KAFKA_CLIENT_ID=api-gateway
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MAX_FILE_SIZE=524288000
+    volumes:
+      - ./apps/api-gateway/src:/app/apps/api-gateway/src
+      - ./libs/shared/src:/app/libs/shared/src
+    networks:
+      - file-processor-network
+    depends_on:
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Upload Service - Kafka consumer (S3 + Redis metadata)
+  upload-service:
+    build:
+      context: .
+      dockerfile: apps/upload-service/Dockerfile
+      target: development
+    container_name: upload-service
+    environment:
+      - NODE_ENV=development
+      - KAFKA_BROKERS=kafka:29092
+      - KAFKA_CLIENT_ID=upload-service
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - AWS_ENDPOINT=http://localstack:4566
+      - AWS_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - S3_BUCKET_NAME=file-uploads
+      - S3_FORCE_PATH_STYLE=true
+    volumes:
+      - ./apps/upload-service/src:/app/apps/upload-service/src
+      - ./libs/shared/src:/app/libs/shared/src
+    networks:
+      - file-processor-network
+    depends_on:
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Processing Service - Kafka consumer (chunking + Elasticsearch indexing)
+  processing-service:
+    build:
+      context: .
+      dockerfile: apps/processing-service/Dockerfile
+      target: development
+    environment:
+      - NODE_ENV=development
+      - KAFKA_BROKERS=kafka:29092
+      - KAFKA_CLIENT_ID=processing-service
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - AWS_ENDPOINT=http://localstack:4566
+      - AWS_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - S3_BUCKET_NAME=file-uploads
+      - S3_FORCE_PATH_STYLE=true
+      - ELASTICSEARCH_NODE=http://elasticsearch:9200
+      - ELASTICSEARCH_INDEX=file-chunks
+      - CHUNK_SIZE=5242880
+      - CHUNK_OVERLAP=100
+      - BATCH_SIZE=100
+    volumes:
+      - ./apps/processing-service/src:/app/apps/processing-service/src
+      - ./libs/shared/src:/app/libs/shared/src
+    networks:
+      - file-processor-network
+    depends_on:
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    deploy:
+      replicas: 2  # Scale processing workers
+    restart: unless-stopped
+
+  # Search Service - Kafka consumer (Elasticsearch queries + Redis cache)
+  search-service:
+    build:
+      context: .
+      dockerfile: apps/search-service/Dockerfile
+      target: development
+    container_name: search-service
+    environment:
+      - NODE_ENV=development
+      - KAFKA_BROKERS=kafka:29092
+      - KAFKA_CLIENT_ID=search-service
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - ELASTICSEARCH_NODE=http://elasticsearch:9200
+      - ELASTICSEARCH_INDEX=file-chunks
+    volumes:
+      - ./apps/search-service/src:/app/apps/search-service/src
+      - ./libs/shared/src:/app/libs/shared/src
+    networks:
+      - file-processor-network
+    depends_on:
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Notification Service - WebSocket + Kafka consumer (port 3004)
+  notification-service:
+    build:
+      context: .
+      dockerfile: apps/notification-service/Dockerfile
+      target: development
+    container_name: notification-service
+    ports:
+      - "3004:3004"
+    environment:
+      - NODE_ENV=development
+      - APP_PORT=3004
+      - KAFKA_BROKERS=kafka:29092
+      - KAFKA_CLIENT_ID=notification-service
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - WS_CORS_ORIGIN=http://localhost:5173
+    volumes:
+      - ./apps/notification-service/src:/app/apps/notification-service/src
+      - ./libs/shared/src:/app/libs/shared/src
+    networks:
+      - file-processor-network
+    depends_on:
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ============================================
+  # Data Stores
+  # ============================================
+
   # Elasticsearch - Search Engine
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
@@ -254,6 +561,10 @@ networks:
     driver: bridge
 
 volumes:
+  kafka-data:
+    driver: local
+  redis-data:
+    driver: local
   elasticsearch-data:
     driver: local
   tempo-data:

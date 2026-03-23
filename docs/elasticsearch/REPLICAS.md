@@ -76,7 +76,7 @@ Node 3: [P2] [R0] [R1]
 Single Node Cluster (No Replicas):
 ┌─────────────────────────┐
 │  Node 1                 │
-│  [P0] [P1] [P2]        │
+│  [P0] [P1] [P2]         │
 │  All data here          │
 └─────────────────────────┘
 

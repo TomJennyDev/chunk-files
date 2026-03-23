@@ -1,117 +1,41 @@
 # ============================================
 # Proxmox Terraform — Root Module
-# Deploy K8s cluster + full stack lên Proxmox VE
+# Mỗi service = 1 LXC container riêng, chạy Docker bên trong
 # ============================================
 
-# ---- VM Nodes ----
-module "proxmox_vm" {
-  source = "./modules/proxmox-vm"
+module "proxmox_docker" {
+  source = "./modules/proxmox-docker"
 
   proxmox_node   = var.proxmox_node
-  vm_count       = var.vm_count
-  vm_id_start    = var.vm_id_start
-  vm_name_prefix = "${var.project_name}-${var.environment}"
-  cpu_cores      = var.vm_cpu_cores
-  cpu_type       = var.vm_cpu_type
-  memory_mb      = var.vm_memory
-  disk_size      = var.vm_disk_size
-  data_disk_size = var.vm_data_disk_size
-  storage        = var.vm_storage
-  network_bridge = var.vm_network_bridge
-  template_name  = var.vm_template_name
-  ip_prefix      = var.vm_ip_prefix
-  ip_start       = var.vm_ip_start
-  gateway        = var.vm_gateway
-  dns            = var.vm_dns
+  ct_id_start    = var.ct_id_start
+  project_name   = "${var.project_name}-${var.environment}"
+  storage        = var.lxc_storage
+  network_bridge = var.lxc_network_bridge
+  ct_template    = var.lxc_template
+  ip_prefix      = var.lxc_ip_prefix
+  gateway        = var.lxc_gateway
+  dns            = var.lxc_dns
   ssh_public_key = var.ssh_public_key
+  password       = var.lxc_password
   tags           = var.tags
-}
 
-# ---- Phase 2: Kubernetes Namespace + ConfigMap + Secrets ----
-module "kubernetes" {
-  source = "../harvester/modules/kubernetes"
+  # Toggle từng service
+  enable_localstack    = var.enable_localstack
+  enable_elasticsearch = var.enable_elasticsearch
+  enable_kibana        = var.enable_kibana
+  enable_observability = var.enable_observability
+  enable_api           = var.enable_api
+  enable_web           = var.enable_web
+  enable_ollama        = var.enable_ollama
 
-  namespace    = var.namespace
-  project_name = var.project_name
-  environment  = var.environment
-
-  labels = {
-    "app.kubernetes.io/part-of" = var.project_name
-    environment                 = var.environment
-  }
-
-  depends_on = [module.proxmox_vm]
-}
-
-# ---- Phase 3: LocalStack (AWS Emulator) ----
-module "localstack" {
-  source = "../harvester/modules/localstack"
-
-  namespace    = module.kubernetes.namespace
-  services     = var.localstack_services
-  storage_size = "5Gi"
-
-  labels = {
-    "app.kubernetes.io/part-of" = var.project_name
-    environment                 = var.environment
-  }
-
-  depends_on = [module.kubernetes]
-}
-
-# ---- Phase 4: Elasticsearch + Kibana ----
-module "elasticsearch" {
-  source = "../harvester/modules/elasticsearch"
-
-  namespace             = module.kubernetes.namespace
+  localstack_services   = var.localstack_services
   elasticsearch_version = var.elasticsearch_version
-  java_opts             = var.elasticsearch_java_opts
-  storage_size          = var.elasticsearch_storage_size
+  ssh_private_key_path  = var.ssh_private_key_path
+  snippets_storage      = var.snippets_storage
 
-  labels = {
-    "app.kubernetes.io/part-of" = var.project_name
-    environment                 = var.environment
-  }
-
-  depends_on = [module.kubernetes]
-}
-
-# ---- Phase 5: Observability (OTel + Tempo + Loki + Prometheus + Grafana) ----
-module "observability" {
-  source = "../harvester/modules/observability"
-
-  namespace              = module.kubernetes.namespace
-  grafana_admin_password = var.grafana_admin_password
-  retention              = var.observability_retention
-  storage_size           = var.observability_storage_size
-
-  labels = {
-    "app.kubernetes.io/part-of" = var.project_name
-    environment                 = var.environment
-  }
-
-  depends_on = [module.kubernetes]
-}
-
-# ---- Phase 6: Application (file-processor API + web + Ingress) ----
-module "application" {
-  source = "../harvester/modules/application"
-
-  namespace       = module.kubernetes.namespace
-  api_image       = var.api_image
-  api_replicas    = var.api_replicas
-  web_image       = var.web_image
-  config_map_name = module.kubernetes.config_map_name
-  secret_name     = module.kubernetes.secret_name
-
-  labels = {
-    "app.kubernetes.io/part-of" = var.project_name
-    environment                 = var.environment
-  }
-
-  depends_on = [
-    module.localstack,
-    module.elasticsearch,
-    module.observability,
-  ]
+  # Ollama config
+  ollama_model  = var.ollama_model
+  ollama_memory = var.ollama_memory
+  ollama_disk   = var.ollama_disk
+  ollama_cores  = var.ollama_cores
 }

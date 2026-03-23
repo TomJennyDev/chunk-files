@@ -19,7 +19,7 @@ export async function searchFilesTool(
   const { query, limit = 10, offset = 0 } = args;
 
   try {
-    const response = await axios.get(`${apiBaseUrl}/files/search`, {
+    const response = await axios.get(`${apiBaseUrl}/search`, {
       params: {
         text: query,
         page: Math.floor(offset / Math.min(limit, 100)),

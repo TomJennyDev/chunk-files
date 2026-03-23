@@ -1,70 +1,60 @@
 # ============================================
 # terraform.tfvars.example
 # Copy thành terraform.tfvars rồi điền giá trị thực
+# Mỗi service = 1 LXC container riêng trên Proxmox
 # ============================================
 
 # ---- Proxmox Connection ----
-proxmox_endpoint       = "https://192.168.1.10:8006"
-proxmox_api_token      = "root@pam!terraform=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-proxmox_insecure       = true         # false nếu Proxmox dùng cert hợp lệ
-proxmox_node           = "pve"        # tên node Proxmox (xem trong UI)
-proxmox_ssh_user       = "root"
+proxmox_endpoint        = "https://192.168.1.10:8006"
+proxmox_api_token       = "root@pam!terraform=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+proxmox_insecure        = true         # false nếu Proxmox dùng cert hợp lệ
+proxmox_node            = "pve"        # tên node Proxmox (xem trong UI)
+proxmox_ssh_user        = "root"
 proxmox_ssh_private_key = "~/.ssh/id_rsa"
 
 # ---- Project ----
 project_name = "chunk-files"
 environment  = "dev"
-namespace    = "chunk-files"
 
-# ---- VM Config ----
-vm_count        = 1               # Số VM (tăng lên nếu cần HA)
-vm_id_start     = 200             # VMID đầu tiên (mỗi VM +1)
-vm_cpu_cores    = 4
-vm_cpu_type     = "x86-64-v2-AES"
-vm_memory       = 8192            # MB
-vm_disk_size    = 50              # GB — root disk
-vm_data_disk_size = 100           # GB — data disk cho K8s PVs
-vm_storage      = "local-lvm"     # Proxmox storage pool
-vm_network_bridge = "vmbr0"       # bridge mạng
+# ---- LXC Settings ----
+ct_id_start        = 300              # CT ID bắt đầu, mỗi service +1
+lxc_storage        = "local-lvm"      # Proxmox storage pool
+lxc_network_bridge = "vmbr0"          # bridge mạng
+lxc_template       = "local:vztmpl/ubuntu-22.04-standard_22.04-1_amd64.tar.zst"
 
-# ---- VM Networking ----
-vm_template_name = "ubuntu-22.04-cloud"   # tên template đã tạo sẵn trên Proxmox
-vm_ip_prefix     = "192.168.1"            # để trống "" để dùng DHCP
-vm_ip_start      = 101                    # last octet của VM đầu tiên → 192.168.1.101
-vm_gateway       = "192.168.1.1"
-vm_dns           = "1.1.1.1"
-ssh_public_key   = "ssh-rsa AAAAB3Nz... your-key-here"
+# ---- Networking ----
+lxc_ip_prefix = "192.168.1"          # để trống "" để dùng DHCP
+lxc_gateway   = "192.168.1.1"
+lxc_dns       = "1.1.1.1"
+lxc_password  = "changeme"           # root password cho tất cả LXC
 
-tags = ["chunk-files", "terraform", "k3s"]
+# IP mỗi service (octet cuối, define trong module):
+#   localstack    → .10    (192.168.1.10)
+#   elasticsearch → .11    (192.168.1.11)
+#   kibana        → .12    (192.168.1.12)
+#   prometheus    → .20    (192.168.1.20)
+#   loki          → .21    (192.168.1.21)
+#   tempo         → .22    (192.168.1.22)
+#   grafana       → .23    (192.168.1.23)
+#   otel          → .24    (192.168.1.24)
+#   api           → .30    (192.168.1.30)
+#   web           → .31    (192.168.1.31)
 
-# ---- Guest K8s (sau khi K3s đã cài) ----
-guest_kubeconfig  = "~/.kube/proxmox-k3s.yaml"
-guest_kube_context = "default"
+ssh_public_key       = "ssh-rsa AAAAB3Nz... your-key-here"
+ssh_private_key_path = "~/.ssh/id_rsa"
 
-# ---- AWS / LocalStack ----
-aws_access_key_id     = "test"
-aws_secret_access_key = "test"
-aws_region            = "us-east-1"
+# ---- Service Toggles (true/false) ----
+enable_localstack    = true
+enable_elasticsearch = true
+enable_kibana        = true
+enable_observability = true   # Grafana + Prometheus + Loki + Tempo + OTel
+enable_api           = true
+enable_web           = false
 
-# ---- Elasticsearch ----
-elasticsearch_storage_size = "20Gi"
-elasticsearch_image_tag    = "8.11.0"
-kibana_image_tag           = "8.11.0"
-elasticsearch_replicas     = 1
+# ---- Service Config ----
+elasticsearch_version  = "8.11.0"
+localstack_services    = "s3,sqs,opensearch,kms,iam,logs,lambda"
+grafana_admin_password = "admin123"
 
-# ---- LocalStack ----
-localstack_storage_size = "10Gi"
-localstack_image_tag    = "latest"
+tags = ["chunk-files", "terraform", "docker"]
 
-# ---- Observability ----
-grafana_admin_password  = "admin123"
-prometheus_storage_size = "10Gi"
-loki_storage_size       = "10Gi"
-tempo_storage_size      = "10Gi"
-
-# ---- Application ----
-api_image    = "chunk-files-api:latest"
-web_image    = "chunk-files-web:latest"
-api_replicas = 1
-web_replicas = 1
-domain       = "chunk-files.local"

@@ -79,7 +79,7 @@ export async function searchFiles(params: {
     query.set('size', String(params.size));
   }
 
-  const res = await fetch(`${API_BASE}/files/search?${query}`);
+  const res = await fetch(`${API_BASE}/search?${query}`);
 
   if (!res.ok) {
     const errBody = await res.json().catch(() => ({}));

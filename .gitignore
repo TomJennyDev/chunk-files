@@ -119,6 +119,7 @@ desktop.ini
 *.pem
 *.key
 credentials.json
+token.txt
 
 # =============================================================
 # Backups

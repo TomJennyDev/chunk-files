@@ -14,9 +14,8 @@ import { ErrorCode, McpError } from "@modelcontextprotocol/sdk/types.js";
  */
 export async function listFilesResource(apiBaseUrl: string) {
   try {
-    const response = await axios.get(`${apiBaseUrl}/files/search`, {
+    const response = await axios.get(`${apiBaseUrl}/search`, {
       params: {
-        text: "*",
         page: 0,
         size: 100,
       },

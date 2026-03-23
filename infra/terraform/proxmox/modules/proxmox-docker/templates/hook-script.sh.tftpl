@@ -1,0 +1,70 @@
+#!/bin/bash
+# ============================================
+# Proxmox Hook Script — ${service_name}
+# Tự động chạy khi container start/stop
+# Chạy trên Proxmox HOST (không phải trong container)
+# ============================================
+
+VMID="$1"
+PHASE="$2"
+
+# Log file cho debug
+LOG="/var/log/hook-${service_name}.log"
+
+log() {
+  echo "[$$(date '+%Y-%m-%d %H:%M:%S')] $*" >> "$$LOG"
+}
+
+log "Hook called: VMID=$$VMID PHASE=$$PHASE"
+
+# Chỉ chạy khi container vừa start xong
+if [ "$$PHASE" != "post-start" ]; then
+  log "Skipping phase: $$PHASE"
+  exit 0
+fi
+
+log "=== Post-start: Bắt đầu setup ${service_name} ==="
+
+# Đợi container networking sẵn sàng
+MAX_WAIT=60
+WAITED=0
+while ! pct exec "$$VMID" -- ping -c1 -W1 1.1.1.1 &>/dev/null; do
+  sleep 2
+  WAITED=$$((WAITED + 2))
+  if [ "$$WAITED" -ge "$$MAX_WAIT" ]; then
+    log "ERROR: Container $$VMID không có network sau $${MAX_WAIT}s"
+    exit 1
+  fi
+done
+log "Network ready sau $${WAITED}s"
+
+# ---- Step 1: Copy setup-docker.sh vào container ----
+SNIPPET_DIR="/var/lib/vz/snippets"
+
+if [ -f "$$SNIPPET_DIR/setup-docker.sh" ]; then
+  pct push "$$VMID" "$$SNIPPET_DIR/setup-docker.sh" /tmp/setup-docker.sh --perms 0755
+  log "Pushed setup-docker.sh"
+else
+  log "ERROR: $$SNIPPET_DIR/setup-docker.sh not found!"
+  exit 1
+fi
+
+# ---- Step 2: Cài Docker (idempotent) ----
+log "Running setup-docker.sh..."
+pct exec "$$VMID" -- /tmp/setup-docker.sh >> "$$LOG" 2>&1
+log "Docker setup done"
+
+# ---- Step 3: Copy & chạy service setup script ----
+if [ -f "$$SNIPPET_DIR/setup-${service_name}.sh" ]; then
+  pct push "$$VMID" "$$SNIPPET_DIR/setup-${service_name}.sh" /tmp/setup-service.sh --perms 0755
+  log "Pushed setup-${service_name}.sh"
+
+  log "Running setup-${service_name}.sh..."
+  pct exec "$$VMID" -- /tmp/setup-service.sh >> "$$LOG" 2>&1
+  log "Service setup done"
+else
+  log "WARNING: $$SNIPPET_DIR/setup-${service_name}.sh not found, skipping service setup"
+fi
+
+log "=== Post-start hoàn tất cho ${service_name} (VMID=$$VMID) ==="
+exit 0

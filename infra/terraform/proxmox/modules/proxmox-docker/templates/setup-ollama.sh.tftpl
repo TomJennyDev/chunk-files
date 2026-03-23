@@ -1,0 +1,99 @@
+#!/bin/bash
+# ============================================
+# Setup Ollama AI — Chạy BÊN TRONG LXC container
+# Pull model tự động sau khi Ollama server start
+# ============================================
+set -euo pipefail
+
+CONTAINER_NAME="ollama"
+IMAGE="ollama/ollama:latest"
+MODEL="${ollama_model}"
+
+echo "=== Setup Ollama AI Server ==="
+
+# ---- Đợi Docker daemon sẵn sàng ----
+MAX_WAIT=30
+WAITED=0
+while ! docker info &>/dev/null; do
+  sleep 2
+  WAITED=$((WAITED + 2))
+  if [ "$WAITED" -ge "$MAX_WAIT" ]; then
+    echo "ERROR: Docker daemon không ready sau $${MAX_WAIT}s"
+    exit 1
+  fi
+done
+
+# ---- Skip nếu container đã chạy ----
+if docker ps --format '{{.Names}}' | grep -q "^$${CONTAINER_NAME}$"; then
+  echo "Ollama đã chạy, kiểm tra model..."
+  
+  # Kiểm tra model đã có chưa
+  if docker exec "$CONTAINER_NAME" ollama list 2>/dev/null | grep -q "$MODEL"; then
+    echo "Model $MODEL đã sẵn sàng!"
+    exit 0
+  else
+    echo "Pull model $MODEL..."
+    docker exec "$CONTAINER_NAME" ollama pull "$MODEL" || echo "WARNING: Pull model failed"
+    exit 0
+  fi
+fi
+
+# ---- Xoá container cũ nếu bị stop ----
+docker rm -f "$CONTAINER_NAME" 2>/dev/null || true
+
+# ---- Tạo thư mục data ----
+mkdir -p /opt/data/ollama
+
+# ---- Pull image ----
+echo "Pulling image: $IMAGE"
+docker pull "$IMAGE" || echo "WARNING: Pull failed, sử dụng cached image"
+
+# ---- Chạy Ollama container ----
+echo "Starting Ollama container..."
+docker run -d \
+  --name "$CONTAINER_NAME" \
+  --restart unless-stopped \
+  --network host \
+  -e "OLLAMA_HOST=0.0.0.0" \
+  -e "OLLAMA_ORIGINS=*" \
+  -e "OLLAMA_NUM_PARALLEL=${ollama_num_parallel}" \
+  -e "OLLAMA_MAX_LOADED_MODELS=1" \
+  -v /opt/data/ollama:/root/.ollama \
+  "$IMAGE"
+
+# ---- Đợi Ollama API sẵn sàng ----
+echo "Đợi Ollama API ready..."
+MAX_WAIT=60
+WAITED=0
+while ! curl -sf http://localhost:11434/api/tags &>/dev/null; do
+  sleep 3
+  WAITED=$((WAITED + 3))
+  if [ "$WAITED" -ge "$MAX_WAIT" ]; then
+    echo "WARNING: Ollama API chưa ready sau $${MAX_WAIT}s, tiếp tục pull model anyway..."
+    break
+  fi
+done
+echo "Ollama API ready sau $${WAITED}s"
+
+# ---- Pull model ----
+echo ""
+echo "======================================="
+echo "  Pulling model: $MODEL"
+echo "  Có thể mất 5-15 phút tùy model..."
+echo "======================================="
+
+# Pull model trong background (tránh timeout hook script)
+nohup bash -c "
+  sleep 5
+  docker exec $CONTAINER_NAME ollama pull $MODEL 2>&1 | tee /var/log/ollama-pull.log
+  echo 'Model $MODEL pulled successfully!' >> /var/log/ollama-pull.log
+" &>/dev/null &
+
+echo ""
+echo "======================================="
+echo "  Ollama server started!"
+echo "  API: http://localhost:11434"
+echo "  Model '$MODEL' đang được pull..."
+echo "  Check: docker exec ollama ollama list"
+echo "  Log:   /var/log/ollama-pull.log"
+echo "======================================="

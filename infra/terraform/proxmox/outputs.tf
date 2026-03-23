@@ -1,45 +1,36 @@
 # ============================================
-# Outputs — Proxmox Deployment
+# Outputs — Proxmox LXC per-service Deployment
 # ============================================
 
-output "vm_ids" {
-  description = "Proxmox VM IDs (name → vm_id)"
-  value       = module.proxmox_vm.vm_ids
+output "service_containers" {
+  description = "Map: service_name → {ct_id, name, ip, image, ports}"
+  value       = module.proxmox_docker.service_containers
 }
 
-output "vm_names" {
-  description = "Tên các VM đã tạo"
-  value       = module.proxmox_vm.vm_names
+output "service_ips" {
+  description = "Map: service_name → IP address"
+  value       = module.proxmox_docker.service_ips
 }
 
-output "vm_ips" {
-  description = "IP addresses của VMs (name → ip)"
-  value       = module.proxmox_vm.vm_ips
-}
-
-output "namespace" {
-  description = "Kubernetes namespace cho ứng dụng"
-  value       = var.namespace
-}
-
-output "kubeconfig_path" {
-  description = "Path đến kubeconfig file của guest cluster"
-  value       = var.guest_kubeconfig
-}
-
-output "application_urls" {
-  description = "URLs truy cập ứng dụng (cần thêm hosts hoặc Ingress)"
-  value = {
-    api     = "http://${var.domain}"
-    grafana = "http://grafana.${var.domain}"
-    kibana  = "http://kibana.${var.domain}"
-  }
+output "service_urls" {
+  description = "URLs truy cập từng service"
+  value       = module.proxmox_docker.service_urls
 }
 
 output "ssh_access" {
-  description = "Hướng dẫn SSH vào VM"
+  description = "Hướng dẫn SSH vào từng container"
   value = {
-    for name in module.proxmox_vm.vm_names :
-    name => "ssh ubuntu@${try(module.proxmox_vm.vm_ips[name], "<dhcp-ip>")}"
+    for k, v in module.proxmox_docker.service_containers :
+    k => "ssh root@${v.ip}"
   }
+}
+
+output "hook_scripts" {
+  description = "Hook scripts được gán cho từng container"
+  value       = module.proxmox_docker.hook_scripts
+}
+
+output "setup_info" {
+  description = "Thông tin về cơ chế tự động"
+  value       = module.proxmox_docker.setup_info
 }
